@@ -1,0 +1,14 @@
+# Virtual environment
+.venv/
+
+# Cache
+__pycache__/
+
+# Flask instance directory
+instance/
+
+# Environment file
+.env
+.env.production
+.env.development
+
