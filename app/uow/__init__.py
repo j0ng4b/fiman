@@ -7,7 +7,6 @@ class IUnitOfWork(ABC):
     def __enter__(self: Self) -> Self:
         return self
 
-
     def __exit__(self,
                  exception_type: Optional[Type[BaseException]],
                  exception_value: Optional[BaseException],
@@ -20,7 +19,6 @@ class IUnitOfWork(ABC):
     @abstractmethod
     def save(self: Self) -> None:
         raise NotImplementedError
-
 
     @abstractmethod
     def rollback(self: Self) -> None:

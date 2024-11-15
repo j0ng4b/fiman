@@ -1,10 +1,18 @@
 import importlib
 import os
 import os.path
+
 from typing import Any, Dict, Optional
 
 from flask import Flask, Blueprint
+from flask_alembic import Alembic
+from flask_sqlalchemy import SQLAlchemy
+
 from kink import di
+
+
+db = SQLAlchemy()
+alembic = Alembic()
 
 
 def create_app(test_config: Optional[Dict[str, Any]] = None) -> Flask:
@@ -12,7 +20,7 @@ def create_app(test_config: Optional[Dict[str, Any]] = None) -> Flask:
 
     # Load configurations
     if test_config is None:
-        app.config.from_pyfile('config.py', silent=True)
+        app.config.from_object('app.config.Config')
     else:
         app.config.from_mapping(test_config)
 
@@ -25,6 +33,10 @@ def create_app(test_config: Optional[Dict[str, Any]] = None) -> Flask:
     # Bootstrap components
     bootstrap_di(app)
     bootstrap_blueprints(app)
+
+    # Initialize Flask extensions
+    db.init_app(app)
+    alembic.init_app(app)
 
     return app
 
