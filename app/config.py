@@ -14,3 +14,6 @@ load_dotenv(env_file)
 class Config:
     DEBUG = os.getenv('DEBUG', 'True') == 'True'
 
+    SQLALCHEMY_DATABASE_URI = os.getenv('DB_URI', 'sqlite:///default.db')
+    SQLALCHEMY_TRACK_MODIFICATIONS = False
+

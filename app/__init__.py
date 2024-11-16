@@ -10,9 +10,11 @@ from flask_sqlalchemy import SQLAlchemy
 
 from kink import di
 
+from app.models.orm import map_domain_to_tables, metadata
+
 
 db = SQLAlchemy()
-alembic = Alembic()
+alembic = Alembic(metadatas=metadata)
 
 
 def create_app(test_config: Optional[Dict[str, Any]] = None) -> Flask:
@@ -33,6 +35,7 @@ def create_app(test_config: Optional[Dict[str, Any]] = None) -> Flask:
     # Bootstrap components
     bootstrap_di(app)
     bootstrap_blueprints(app)
+    map_domain_to_tables()
 
     # Initialize Flask extensions
     db.init_app(app)
