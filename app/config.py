@@ -14,5 +14,3 @@ load_dotenv(env_file)
 class Config:
     DEBUG = os.getenv('DEBUG', 'True') == 'True'
 
-    SECRET_KEY = os.getenv('SECRET_KEY', 'default_secret_key')
-
