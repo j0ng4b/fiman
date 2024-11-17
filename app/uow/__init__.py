@@ -24,3 +24,52 @@ class IUnitOfWork(ABC):
     def rollback(self: Self) -> None:
         raise NotImplementedError
 
+    @abstractmethod
+    def close(self: Self) -> None:
+        raise NotImplementedError
+
+    @property
+    @abstractmethod
+    def user(self):
+        raise NotImplementedError
+
+    @property
+    @abstractmethod
+    def account(self):
+        raise NotImplementedError
+
+    @property
+    @abstractmethod
+    def user_account(self):
+        raise NotImplementedError
+
+    @property
+    @abstractmethod
+    def invitation(self):
+        raise NotImplementedError
+
+    @property
+    @abstractmethod
+    def category(self):
+        raise NotImplementedError
+
+    @property
+    @abstractmethod
+    def product(self):
+        raise NotImplementedError
+
+    @property
+    @abstractmethod
+    def date(self):
+        raise NotImplementedError
+
+    @property
+    @abstractmethod
+    def batch(self):
+        raise NotImplementedError
+
+    @property
+    @abstractmethod
+    def transaction(self):
+        raise NotImplementedError
+
