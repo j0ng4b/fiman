@@ -12,6 +12,9 @@ from kink import di
 
 from app.model.orm import map_domain_to_tables, metadata
 
+from app.uow import IUnitOfWork
+from app.uow.fake import FakeUnitOfWork
+
 
 db = SQLAlchemy()
 alembic = Alembic(metadatas=metadata)
@@ -45,11 +48,8 @@ def create_app(test_config: Optional[Dict[str, Any]] = None) -> Flask:
 
 
 def bootstrap_di(app: Flask) -> None:
-    from .uow import IUnitOfWork
-
-    # TODO: specify Unit Of Work implementation
     if app.config['TESTING']:
-        di[IUnitOfWork] = None
+        di[IUnitOfWork] = FakeUnitOfWork()
     else:
         di[IUnitOfWork] = None
 
