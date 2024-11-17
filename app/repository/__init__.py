@@ -11,11 +11,11 @@ class IRepository(Generic[T], ABC):
         raise NotImplementedError
 
     @abstractmethod
-    def update(self: Self, record: T) -> T:
+    def update(self: Self, record: T) -> None:
         raise NotImplementedError
 
     @abstractmethod
-    def delete(self: Self, record: T) -> T:
+    def delete(self: Self, record: T) -> None:
         raise NotImplementedError
 
     @abstractmethod
