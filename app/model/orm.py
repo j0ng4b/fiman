@@ -1,7 +1,7 @@
 from sqlalchemy import TIMESTAMP, Boolean, Column, DateTime, Enum, ForeignKey, Integer, MetaData, Numeric, String, Table
 from sqlalchemy.orm import registry
 from sqlalchemy.sql import expression, func
-import app.models.domain as models
+import app.model.domain as models
 
 
 metadata = MetaData()

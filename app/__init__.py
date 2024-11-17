@@ -10,7 +10,7 @@ from flask_sqlalchemy import SQLAlchemy
 
 from kink import di
 
-from app.models.orm import map_domain_to_tables, metadata
+from app.model.orm import map_domain_to_tables, metadata
 
 
 db = SQLAlchemy()
