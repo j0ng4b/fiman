@@ -1,7 +1,7 @@
 # 01 — Visão e escopo
 
 - **Status:** Rascunho
-- **Versão:** 0.2
+- **Versão:** 0.3
 - **Última atualização:** 09-10-2026
 
 ## 1. Problema
@@ -68,7 +68,8 @@ competência anterior ao vencimento**.
     previstas e realizadas. O mês de competência não muda após o pagamento.
 
 - **Gestão de Contas e Transferências:**
-  - Cadastro de múltiplas contas.
+  - Cadastro de múltiplas contas, cada uma com saldo inicial e data de início do
+    rastreamento.
 
   - Movimentação/transferência de valores entre contas internas.
 
