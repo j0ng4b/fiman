@@ -1,7 +1,7 @@
 # 02 — Requisitos
 
 - **Status:** Rascunho
-- **Versão:** 0.3
+- **Versão:** 0.4
 - **Última atualização:** 10-10-2026
 
 ## Requisitos funcionais
@@ -62,6 +62,17 @@ Funcionalidade: Controle duplo de execução (RF-003, RF-004)
     Então o status do lançamento passa para "realizado"
     E o sistema indica um adiantamento de 2 dias no pagamento
     E o sistema registra uma variação positiva de 1,50 a favor do usuário
+
+  Cenário: Registrar um lançamento já realizado
+    Dado que hoje é "10/10/2026"
+    Quando eu registro uma despesa já realizada de 85,00 com data_realizada "10/10/2026"
+    Então o valor_previsto é 85,00 e a data_prevista é "10/10/2026"
+    E o lançamento é indicado como "em dia"
+
+  Cenário: Data realizada futura é rejeitada
+    Dado que hoje é "10/10/2026"
+    Quando eu tento registrar uma despesa realizada com data_realizada "15/10/2026"
+    Então o sistema rejeita com a mensagem "A data de um lançamento realizado não pode ser futura"
 ```
 
 ```gherkin
