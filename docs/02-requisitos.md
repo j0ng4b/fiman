@@ -1,7 +1,7 @@
 # 02 — Requisitos
 
 - **Status:** Rascunho
-- **Versão:** 0.4
+- **Versão:** 0.5
 - **Última atualização:** 10-10-2026
 
 ## Requisitos funcionais
@@ -30,6 +30,7 @@
 | RF-020 | O sistema deve ajustar para o primeiro dia útil seguinte a data prevista das parcelas geradas que caírem em fim de semana ou feriado nacional, permitindo ao usuário alterá-la manualmente.               | Should     | Visão §5 | Rascunho |
 | RF-021 | O sistema deve permitir estornar um lançamento realizado, mantendo o original e criando um lançamento inverso vinculado a ele.                                                                            | Should     | Visão §5 | Rascunho |
 | RF-022 | O sistema deve permitir editar e cancelar lançamentos previstos.                                                                                                                                          | Must       | Visão §5 | Rascunho |
+| RF-023 | O sistema deve atribuir a categoria padrão "Outros" do tipo correspondente a lançamentos criados ou importados sem categoria.                                                                             | Must       | Visão §5 | Rascunho |
 
 > Escrever no formato:
 >
@@ -209,4 +210,24 @@ Funcionalidade: Correção de lançamentos (RF-021, RF-022)
     E é criado um estorno vinculado de 120,00 em "09/10/2026"
     E o saldo da conta volta ao valor anterior ao pagamento
     E as despesas de "09/10/2026" são reduzidas em 120,00
+```
+
+```gherkin
+Funcionalidade: Categoria padrão (RF-023)
+
+  Cenário: Importar lançamento sem categoria
+    Dado um arquivo CSV com uma despesa de 50,00 sem categoria
+    Quando eu importo o arquivo
+    Então o lançamento é criado na categoria "Outros" do tipo despesa
+
+  Cenário: Inativar uma categoria do sistema
+    Dado a categoria "Outros" do tipo despesa
+    Quando eu tento inativá-la
+    Então o sistema rejeita com a mensagem "Categorias do sistema não podem ser inativadas"
+
+  Cenário: Importar lançamento com categoria inexistente
+    Dado um arquivo CSV com uma despesa de 50,00 na categoria "Mercadoo", que não existe
+    Quando eu importo o arquivo
+    Então a linha é rejeitada e listada com a mensagem "Categoria 'Mercadoo' não encontrada"
+    E nenhum lançamento é criado para essa linha
 ```

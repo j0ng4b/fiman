@@ -1,7 +1,7 @@
 # 00 — Glossário e Linguagem Ubíqua
 
 - **Status:** Rascunho
-- **Versão:** 0.1
+- **Versão:** 0.2
 - **Última atualização:** 10-10-2026
 
 Este documento estabelece a Linguagem Ubíqua do sistema, definindo os termos
@@ -151,8 +151,13 @@ original permanece intacto.
 
 ### Categoria
 
-Classificação de um lançamento (ex.: Moradia, Salário). Tem tipo de receita ou de
-despesa.
+Classificação de um lançamento (ex.: Moradia, Salário). Tem tipo de receita ou
+de despesa.
+
+### Categoria Padrão do Sistema ("Outros")
+
+Categoria reservada, uma para cada tipo de lançamento (Receita e Despesa), criada
+junto com o usuário. Não pode ser inativada nem excluída.
 
 ### Inativar
 
