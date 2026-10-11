@@ -1,7 +1,7 @@
 # 02 — Requisitos
 
 - **Status:** Rascunho
-- **Versão:** 0.5
+- **Versão:** 0.6
 - **Última atualização:** 10-10-2026
 
 ## Requisitos funcionais
@@ -109,6 +109,11 @@ Funcionalidade: Parcelamento (RF-005, RF-006)
     Quando eu crio o parcelamento em 3x
     Então as parcelas previstas são 33,34, 33,33 e 33,33
     E a soma das parcelas é 100,00
+
+  Cenário: Parcelamento em uma única parcela
+    Dado uma compra de 150,00
+    Quando eu crio o parcelamento em 1x
+    Então é criada uma única parcela prevista de 150,00
 ```
 
 ```gherkin
