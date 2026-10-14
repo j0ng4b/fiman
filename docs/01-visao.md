@@ -1,8 +1,8 @@
 # 01 — Visão e escopo
 
-- **Status:** Rascunho
-- **Versão:** 0.3
-- **Última atualização:** 09-10-2026
+- **Status:** Revisado
+- **Versão:** 0.4
+- **Última atualização:** 13-10-2026
 
 ## 1. Problema
 
@@ -20,22 +20,28 @@ mensal e anual.
 ## 2. Objetivo
 
 Desenvolver um sistema de gestão financeira pessoal leve e focado em
-previsibilidade, permitindo registrar movimentações financeiras e visualizar
-métricas (diárias, mensais e anuais) e projeções com divergência de datas e
-valores (previsto vs. realizado), incluindo a **reserva de despesas em um mês de
-competência anterior ao vencimento**.
+previsibilidade, que permita registrar lançamentos (receitas e despesas,
+previstos ou realizados), visualizar métricas diárias, mensais e anuais,
+projetar o saldo e acompanhar a variação entre o previsto e o realizado,
+incluindo a reserva de lançamentos em um mês de competência anterior ao
+vencimento.
 
-## 3. Objetivos de aprendizado (portfólio)
+## 3. Objetivos do projeto como portfólio
 
-- **Engenharia de Requisitos & Modelagem:** Levantamento detalhado de
-  requisitos, mapeamento de processos financeiros pessoais e rastreabilidade.
+O projeto serve também para praticar e demonstrar atividades de análise e
+desenvolvimento de sistemas:
 
-- **Arquitetura & Decisões Técnico-Estratégicas:** Estruturação de Monorepo com
-  NestJS e Vue.js, com persistência via Drizzle ORM.
+- **Especificação:** requisitos, regras de negócio e critérios de aceite, em
+  documentos enxutos e consistentes entre si.
 
-- **Documentação de Sistema:** Registro de Architecture Decision Records (ADRs)
-  para escolhas de modelagem de parcelamentos, eixos de tempo (caixa e
-  competência) e ciclo de vida de lançamentos.
+- **Modelagem:** domínio e dados, partindo de uma linguagem ubíqua compartilhada
+  entre documentos, código e banco.
+
+- **Arquitetura e decisões:** monorepo com NestJS e Vue, persistência com
+  Drizzle, e decisões de arquitetura registradas em ADRs.
+
+- **Implementação:** fatias verticais ponta a ponta (Vue, NestJS e Drizzle), com
+  testes sobre as regras de negócio.
 
 ## 4. Stakeholders e usuários
 
@@ -49,57 +55,56 @@ competência anterior ao vencimento**.
 ### Dentro do escopo (MVP)
 
 - **Gestão de Lançamentos:**
-  - Registro de receitas e despesas (efetivadas/confirmadas e planejadas/não
-    confirmadas).
+  - Registro de receitas e despesas, previstas ou realizadas, classificadas por
+    categoria.
 
-  - Lançamento de despesas parceladas (geração automática de parcelas com
-    vínculo).
+  - Parcelamento: geração automática das parcelas de um lançamento.
 
-  - Controle duplo de execução:
-    - **Datas:** data de vencimento/planejada vs. data efetiva de
-      pagamento/recebimento (identificando adiantamentos e atrasos).
+  - Acompanhamento da **variação** entre previsto e realizado:
+    - **Data:** Data Prevista vs. Data Realizada (adiantamento ou atraso).
 
-    - **Valores:**
-      valor previsto/planejado vs. valor efetivamente pago/recebido.
+    - **Valor:** Valor Previsto vs. Valor Realizado.
 
-  - **Reserva por mês de competência:** um lançamento pode ser atribuído a um
-    mês de competência anterior ao do vencimento. Esse mês, e o ano
-    correspondente, passam a contar o lançamento nas métricas mensais e anuais,
-    previstas e realizadas. O mês de competência não muda após o pagamento.
+  - **Reserva:** um lançamento pode ter Mês de Competência anterior ao mês do
+    vencimento. Ele passa a contar no planejamento desse mês e do ano
+    correspondente, sem alterar o caixa.
 
-- **Gestão de Contas e Transferências:**
-  - Cadastro de múltiplas contas, cada uma com saldo inicial e data de início do
-    rastreamento.
+  - **Correção por estorno:** lançamentos realizados não são editados nem
+    cancelados; erros se corrigem por estorno, que preserva o histórico.
 
-  - Movimentação/transferência de valores entre contas internas.
+- **Gestão de Contas, Categorias e Transferências:**
+  - Contas, cada uma com saldo inicial e data de início do rastreamento.
+
+  - Categorias de receita e de despesa.
+
+  - Transferência de dinheiro entre contas.
 
 - **Métricas e Projeções:**
-  - **Visão diária (eixo de caixa):** acompanha o que realmente aconteceu até
-    hoje e projeta o futuro pela data prevista. Ignora o mês de competência.
+  - **Visão diária (eixo de caixa):** o que realmente aconteceu até hoje e,
+    daí em diante, o previsto na Data Prevista.
 
-  - **Visões mensal e anual (eixo de competência):** consolidam o que pertence
-    ao período, incluindo as reservas.
+  - **Visões mensal e anual (eixo de competência):** o que pertence a cada
+    período, incluindo as reservas.
 
-  - Projeção financeira baseada em lançamentos previstos.
+  - Projeção de saldo com base nos lançamentos previstos.
 
-  - Indicadores visuais de divergência de valor e status de pagamento.
+  - Indicadores visuais de variação e do estado dos lançamentos (previsto,
+    realizado, vencido).
 
-- **Importação e Exportação de dados:**
-  - Importar dados de receitas e despesas em outros formatos de arquivos (CSV).
+### Depois do MVP
 
-  - Exportar dados para outros formatos de arquivos (CSV).
+- Importação e exportação de lançamentos em CSV.
+- Ajuste automático das datas das parcelas para dia útil.
 
 ### Fora do escopo (neste ciclo)
 
-- Autenticação e suporte a múltiplos usuários (multi-tenant).
-
+- Autenticação e múltiplos usuários (o modelo já prevê `user_id`; no MVP existe
+  apenas o usuário padrão).
 - Importação automática via Open Finance / OFX / extratos bancários.
-
 - Gestão e cotação de ativos de investimentos em tempo real.
-
 - Notificações por e-mail ou push.
-
 - Bloqueio diário do saldo a partir da reserva (saldo disponível dia a dia).
+- Lançamentos recorrentes (ex.: conta de água todo mês).
 
 ## 6. Premissas e restrições
 
@@ -108,6 +113,7 @@ competência anterior ao vencimento**.
 | Premissa  | O uso inicial será estritamente pessoal (Single-User), rodando em ambiente controlado.                                      |
 | Premissa  | A modelagem do banco de dados deve prever uma futura migração para suporte a múltiplos usuários sem refatoração destrutiva. |
 | Premissa  | A reserva é uma atribuição de competência: não movimenta dinheiro nem altera o saldo em caixa ou a visão diária.            |
+| Premissa  | Todos os valores são em reais (BRL), com uma única moeda.                                                                   |
 | Restrição | **Stack:** Frontend em Vue.js (com Tailwind CSS), Backend em NestJS e ORM com Drizzle.                                      |
 
 ## 7. Riscos
@@ -117,6 +123,7 @@ competência anterior ao vencimento**.
 | Escopo crescer além do MVP                                             | Média         | Alto    | Manter a lista "Fora do escopo" estrita e priorizar regras de negócio essenciais.                                                                                         |
 | Complexidade na projeção e recalculo de parcelas                       | Média         | Médio   | Modelar explicitamente o ciclo de vida do lançamento desde a camada do banco de dados.                                                                                    |
 | Dois eixos de tempo (caixa e competência) gerarem leituras divergentes | Média         | Médio   | Documentar a diferença, nomear os eixos nas telas ("Caixa" e "Competência") e cobrir com testes os casos em que pagamento e competência caem em meses ou anos diferentes. |
+| Documentação excessiva                                                 | Média         | Médio   | Documentos mínimos; criar os demais sob demanda, junto de cada fatia de código.                                                                                           |
 
 ## 8. Critérios de sucesso
 
@@ -126,7 +133,7 @@ competência anterior ao vencimento**.
 - Identificar com facilidade o histórico de atrasos, adiantamentos e variações
   entre o valor planejado e o pago nas parcelas/contas passadas.
 
-- Registrar uma nova movimentação ou transferência em menos de 1 minuto.
+- Registrar um novo lançamento ou transferência em menos de 1 minuto.
 
 - Ver, no resultado do mês anterior, as contas que vencem no início do mês
   seguinte já consideradas como reserva.
