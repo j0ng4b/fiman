@@ -42,14 +42,18 @@ não renumerar os documentos existentes.
 
 **Status** (cabeçalho de cada documento, que é a única fonte dessa informação):
 
-| Status     | Significado                                                              |
-| ---------- | ------------------------------------------------------------------------ |
-| `Rascunho` | Em escrita; pode mudar sem aviso e tem pendências conhecidas             |
-| `Revisado` | Relido e consistente com os demais documentos, sem pendências conhecidas |
-| `Aprovado` | Pronto para implementar; só muda por mudança de escopo                   |
-| `Obsoleto` | Substituído ou descartado; mantido só para histórico                     |
+| Status       | Significado                                                                   |
+| ------------ | ----------------------------------------------------------------------------- |
+| `Rascunho`   | Em escrita; pode mudar sem aviso e tem pendências conhecidas                  |
+| `Revisado`   | Relido e consistente com os documentos de que deriva; pronto para implementar |
+| `Verificado` | O sistema construído segue o documento, confirmado por código e testes        |
+| `Obsoleto`   | Substituído ou descartado; mantido só para histórico                          |
 
-**Prioridade (MoSCoW):** `Must`, `Should`, `Could`, `Won't` (neste ciclo).
+Um documento só é `Revisado` se os de que deriva já estão `Revisado` ou
+`Verificado`. Mudar o significado de um documento devolve-o a `Rascunho`;
+corrigir texto, não.
+
+**Prioridade (MoSCoW):** `Must`, `Should`, `Could`, `Won't`.
 
 **Diagramas:** Mermaid em blocos ` ```mermaid `. Renderizam direto no GitHub.
 
