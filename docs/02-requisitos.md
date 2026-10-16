@@ -1,8 +1,8 @@
 # 02 — Requisitos
 
 - **Status:** Revisado
-- **Versão:** 0.7
-- **Última atualização:** 15-10-2026
+- **Versão:** 0.8
+- **Última atualização:** 16-10-2026
 
 ## Requisitos funcionais
 
@@ -31,7 +31,7 @@
 | RF-018 | O sistema deve manter o Mês de Competência de um lançamento ao confirmá-lo.                                                                                                                       | Must       |
 | RF-019 | O sistema deve exigir, ao cadastrar uma conta, o Saldo Inicial e a Data de Início do rastreamento.                                                                                                | Must       |
 | RF-020 | O sistema deve ajustar para o primeiro dia útil seguinte a Data Prevista das Parcelas geradas que caírem em fim de semana ou feriado nacional, permitindo ao usuário alterá-la manualmente.       | Won't      |
-| RF-021 | O sistema deve permitir estornar um lançamento Realizado, mantendo o original e criando um lançamento inverso vinculado a ele.                                                                    | Should     |
+| RF-021 | O sistema deve permitir estornar um lançamento Realizado, registrando a Data do Estorno no próprio lançamento, que permanece visível.                                                             | Should     |
 | RF-022 | O sistema deve permitir editar e cancelar lançamentos Previstos.                                                                                                                                  | Must       |
 | RF-023 | O sistema deve atribuir a Categoria Padrão do Sistema, do tipo do lançamento, a lançamentos criados sem categoria.                                                                                | Must       |
 | RF-024 | O sistema deve exibir o Saldo Atual de cada conta.                                                                                                                                                | Must       |

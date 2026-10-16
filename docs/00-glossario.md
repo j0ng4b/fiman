@@ -1,8 +1,8 @@
 # 00 — Glossário e Linguagem Ubíqua
 
 - **Status:** Revisado
-- **Versão:** 0.3
-- **Última atualização:** 13-10-2026
+- **Versão:** 0.4
+- **Última atualização:** 16-10-2026
 
 Este documento estabelece a Linguagem Ubíqua do sistema: o vocabulário comum dos
 documentos, do código e do banco. Os documentos usam termos em português; o
@@ -206,10 +206,17 @@ Divergência entre o planejado e o executado:
 
 ### Estorno
 
-Correção de um lançamento Realizado por meio de um novo lançamento vinculado ao
-original, com efeito invertido. O original permanece intacto.
+Correção de um lançamento Realizado: o lançamento é marcado como estornado, com
+a Data do Estorno, e o seu efeito é anulado a partir dessa data. O lançamento
+permanece intacto e visível.
 
-**Em código:** `reversal_of_id`, que aponta para o lançamento original.
+**Em código:** `reversal_date`.
+
+### Data do Estorno
+
+Data a partir da qual o efeito de um lançamento estornado é anulado.
+
+**Em código:** `reversal_date`.
 
 ### Categoria
 
