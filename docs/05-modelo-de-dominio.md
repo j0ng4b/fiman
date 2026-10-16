@@ -1,75 +1,72 @@
 # 05 — Modelo de domínio
 
-- **Status:** Rascunho
-- **Versão:** 0.1
-- **Última atualização:** 10-10-2026
+- **Status:** Revisado
+- **Versão:** 0.2
+- **Última atualização:** 16-10-2026
 
 Modelo conceitual do domínio: entidades, atributos, relacionamentos e fronteiras
-de consistência. As regras que governam o comportamento estão em
-`03-regras-de-negocio.md` e o significado de cada termo, em `00-glossario.md`.
-
-Aqui só aparece a estrutura do negócio.
+de consistência.
 
 ## Diagrama de classes (conceitual)
 
 ```mermaid
 classDiagram
-    class Conta {
+    class Account {
         id
-        nome
-        saldo_inicial
-        data_inicio
-        ativa
-        +saldoAtual() Dinheiro
-        +saldoProjetado(D) Dinheiro
+        name
+        initial_balance
+        start_date
+        active
+        +current_balance() Dinheiro
+        +projected_balance(as_of) Dinheiro
     }
-    class Categoria {
+    class Category {
         id
-        nome
-        tipo
-        eh_sistema
-        ativa
+        name
+        type
+        is_system
+        active
     }
-    class Lancamento {
+    class Transaction {
         id
-        tipo
-        estado
-        descricao
-        valor_previsto
-        data_prevista
-        valor_realizado
-        data_realizada
-        mes_competencia
-        numero_parcela
-        +vencido() bool
-        +variacaoDias() int
-        +variacaoValor() Dinheiro
-        +ehEstorno() bool
+        type
+        status
+        description
+        amount
+        due_date
+        paid_amount
+        transaction_date
+        accounting_month
+        reversal_date
+        installment_number
+        +is_overdue() Booleano
+        +date_variation() Inteiro
+        +value_variation() Dinheiro
+        +is_reversed() Booleano
     }
-    class Parcelamento {
+    class Installment {
         id
-        tipo
-        descricao
-        valor_total
-        quantidade_parcelas
-        data_primeira_parcela
-        +gerarParcelas() List~Lancamento~
+        type
+        description
+        total_amount
+        installment_count
+        first_installment_date
+        +generate_installments() Lista~Transaction~
     }
-    class Transferencia {
+    class Transfer {
         id
-        valor
-        data
-        descricao
+        amount
+        date
+        description
     }
 
-    Conta "1" --> "*" Lancamento : contém
-    Categoria "1" --> "*" Lancamento : classifica
-    Parcelamento "0..1" --> "1..*" Lancamento : gera
-    Lancamento "0..1" --> "0..1" Lancamento : estorna
-    Conta "1" --> "*" Transferencia : origem
-    Conta "1" --> "*" Transferencia : destino
-    Parcelamento "*" --> "1" Conta : conta das parcelas
-    Parcelamento "*" --> "1" Categoria : categoria das parcelas
+    Account "1" --> "*" Transaction : contains
+    Category "1" --> "*" Transaction : classifies
+    Installment "0..1" --> "1..*" Transaction : generates
+    Account "1" --> "*" Transfer : source
+    Account "1" --> "*" Transfer : destination
+    Installment "*" --> "1" Account : account
+    Installment "*" --> "1" Category : category
 ```
 
 Todas as entidades de negócio pertencem a um **Usuário** (o usuário padrão no
@@ -77,142 +74,132 @@ MVP). Ele foi omitido do diagrama para não poluí-lo com cinco setas.
 
 ## Entidades
 
-### Conta
+### Account
 
 Fonte financeira real do usuário.
 
-| Atributo        | Tipo     | Obrigatório | Descrição                                |
-| --------------- | -------- | ----------- | ---------------------------------------- |
-| `id`            | Id       | Sim         | Identificador                            |
-| `nome`          | Texto    | Sim         | Nome da conta                            |
-| `saldo_inicial` | Dinheiro | Sim         | Saldo no início do rastreamento          |
-| `data_inicio`   | Data     | Sim         | Dia a partir do qual a conta é rastreada |
-| `ativa`         | Booleano | Sim         | Falso quando inativada                   |
+| Atributo          | Tipo     | Obrigatório | Descrição                      |
+| ----------------- | -------- | ----------- | ------------------------------ |
+| `id`              | Id       | Sim         | Identificador                  |
+| `name`            | Texto    | Sim         | Nome da conta                  |
+| `initial_balance` | Dinheiro | Sim         | Saldo Inicial                  |
+| `start_date`      | Data     | Sim         | Data de Início do rastreamento |
+| `active`          | Booleano | Sim         | Falso quando inativada         |
 
-Derivados (não armazenados): **saldo atual**, **saldo projetado** em uma data de
-consulta D.
+Derivados (não armazenados): **Saldo Atual** e **Saldo Projetado** em uma Data de
+Consulta (D).
 
-### Categoria
+### Category
 
 Classificação de lançamentos. Não há hierarquia: toda categoria está no mesmo
 nível.
 
-| Atributo     | Tipo               | Obrigatório | Descrição                                     |
-| ------------ | ------------------ | ----------- | --------------------------------------------- |
-| `id`         | Id                 | Sim         | Identificador                                 |
-| `nome`       | Texto              | Sim         | Nome da categoria                             |
-| `tipo`       | Receita ou Despesa | Sim         | Tipo da categoria                             |
-| `eh_sistema` | Booleano           | Sim         | Verdadeiro para categorias nativas ("Outros") |
-| `ativa`      | Booleano           | Sim         | Falso quando inativada                        |
+| Atributo    | Tipo               | Obrigatório | Descrição                                       |
+| ----------- | ------------------ | ----------- | ----------------------------------------------- |
+| `id`        | Id                 | Sim         | Identificador                                   |
+| `name`      | Texto              | Sim         | Nome da categoria                               |
+| `type`      | Receita ou Despesa | Sim         | Tipo da categoria                               |
+| `is_system` | Booleano           | Sim         | Verdadeiro para as Categorias Padrão do Sistema |
+| `active`    | Booleano           | Sim         | Falso quando inativada                          |
 
-### Lançamento
+### Transaction
 
 Unidade central do sistema: uma receita ou despesa, prevista ou realizada.
 
-| Atributo          | Tipo                             | Obrigatório            | Descrição                           |
-| ----------------- | -------------------------------- | ---------------------- | ----------------------------------- |
-| `id`              | Id                               | Sim                    | Identificador                       |
-| `tipo`            | Receita ou Despesa               | Sim                    | Natureza do lançamento              |
-| `estado`          | Previsto, Realizado ou Cancelado | Sim                    | Ciclo de vida                       |
-| `descricao`       | Texto                            | Sim                    | Descrição                           |
-| `valor_previsto`  | Dinheiro                         | Sim                    | Valor planejado                     |
-| `data_prevista`   | Data                             | Sim                    | Data planejada (vencimento)         |
-| `valor_realizado` | Dinheiro                         | Somente se Realizado   | Valor efetivamente pago ou recebido |
-| `data_realizada`  | Data                             | Somente se Realizado   | Data em que ocorreu                 |
-| `mes_competencia` | Mês de competência               | Sim                    | Mês a que o lançamento pertence     |
-| `numero_parcela`  | Inteiro                          | Somente se for parcela | Posição da parcela no parcelamento  |
+| Atributo             | Tipo               | Obrigatório                      | Descrição                                               |
+| -------------------- | ------------------ | -------------------------------- | ------------------------------------------------------- |
+| `id`                 | Id                 | Sim                              | Identificador                                           |
+| `type`               | Receita ou Despesa | Sim                              | Natureza do lançamento                                  |
+| `status`             | Estado             | Sim                              | Estado do Lançamento (Previsto, Realizado ou Cancelado) |
+| `description`        | Texto              | Sim                              | Descrição                                               |
+| `amount`             | Dinheiro           | Sim                              | Valor Previsto                                          |
+| `due_date`           | Data               | Sim                              | Data Prevista (vencimento)                              |
+| `paid_amount`        | Dinheiro           | Somente se Realizado             | Valor Realizado                                         |
+| `transaction_date`   | Data               | Somente se Realizado             | Data Realizada                                          |
+| `accounting_month`   | Mês de Competência | Sim                              | Mês de Competência                                      |
+| `reversal_date`      | Data               | Somente se Realizado e estornado | Data do Estorno                                         |
+| `installment_number` | Inteiro            | Somente se for parcela           | Posição da parcela no Parcelamento                      |
 
-Relacionamentos: pertence a exatamente uma **Conta**; pertence obrigatoriamente
-a uma **Categoria**; pode pertencer a um **Parcelamento**; pode estornar outro
-Lançamento.
+Relacionamentos: pertence a exatamente uma **Account**; pertence obrigatoriamente
+a uma **Category**; pode pertencer a um **Installment**.
 
-Derivados (não armazenados): **vencido**, **variação de data**, **variação de
-valor** (absoluta e percentual) e **é estorno**.
+Derivados (não armazenados): **Vencido**, **Variação de Data**, **Variação de
+Valor** (absoluta e percentual) e **Estornado**.
 
-### Parcelamento
+### Installment
 
-Divisão de uma operação em N parcelas mensais. É a origem das parcelas, que
-depois vivem como lançamentos independentes.
+Divisão de uma operação financeira em parcelas mensais vinculadas, geradas
+automaticamente.
 
-| Atributo                | Tipo               | Obrigatório | Descrição                        |
-| ----------------------- | ------------------ | ----------- | -------------------------------- |
-| `id`                    | Id                 | Sim         | Identificador                    |
-| `tipo`                  | Receita ou Despesa | Sim         | Natureza das parcelas            |
-| `descricao`             | Texto              | Sim         | Descrição                        |
-| `valor_total`           | Dinheiro           | Sim         | Valor total da operação          |
-| `quantidade_parcelas`   | Inteiro            | Sim         | N                                |
-| `data_primeira_parcela` | Data               | Sim         | Data informada para a 1ª parcela |
+| Atributo                 | Tipo               | Obrigatório | Descrição                        |
+| ------------------------ | ------------------ | ----------- | -------------------------------- |
+| `id`                     | Id                 | Sim         | Identificador                    |
+| `type`                   | Receita ou Despesa | Sim         | Natureza das parcelas            |
+| `description`            | Texto              | Sim         | Descrição                        |
+| `total_amount`           | Dinheiro           | Sim         | Valor total da operação (V)      |
+| `installment_count`      | Inteiro            | Sim         | Quantidade de parcelas (N)       |
+| `first_installment_date` | Data               | Sim         | Data informada para a 1ª parcela |
 
-Relacionamentos: **Conta** e **Categoria** informadas na criação, usadas para
+Relacionamentos: **Account** e **Category** informadas na criação, usadas para
 gerar as parcelas.
 
-### Transferência
+### Transfer
 
-Movimentação de dinheiro entre duas contas do usuário.
+Movimentação de dinheiro entre duas contas do próprio usuário.
 
-| Atributo    | Tipo     | Obrigatório | Descrição            |
-| ----------- | -------- | ----------- | -------------------- |
-| `id`        | Id       | Sim         | Identificador        |
-| `valor`     | Dinheiro | Sim         | Valor transferido    |
-| `data`      | Data     | Sim         | Dia da transferência |
-| `descricao` | Texto    | Não         | Observação           |
+| Atributo      | Tipo     | Obrigatório | Descrição            |
+| ------------- | -------- | ----------- | -------------------- |
+| `id`          | Id       | Sim         | Identificador        |
+| `amount`      | Dinheiro | Sim         | Valor transferido    |
+| `date`        | Data     | Sim         | Dia da transferência |
+| `description` | Texto    | Não         | Observação           |
 
-Relacionamentos: uma **Conta** de origem e uma **Conta** de destino.
+Relacionamentos: uma **Account** de origem e uma **Account** de destino.
 
-### Usuário
+### User
 
 Dono dos dados. No MVP existe apenas o usuário padrão.
 
 | Atributo | Tipo  | Obrigatório | Descrição     |
 | -------- | ----- | ----------- | ------------- |
 | `id`     | Id    | Sim         | Identificador |
-| `nome`   | Texto | Sim         | Nome          |
+| `name`   | Texto | Sim         | Nome          |
 
 ## Tipos de valor
 
 | Tipo               | Descrição                                                 |
 | ------------------ | --------------------------------------------------------- |
+| Id                 | Identificador inteiro, gerado automaticamente             |
+| Texto              | Cadeia de caracteres                                      |
+| Inteiro            | Número inteiro                                            |
+| Booleano           | Verdadeiro ou falso                                       |
 | Dinheiro           | Valor em reais, representado por inteiro em centavos      |
 | Data               | Dia civil, sem horário e sem fuso                         |
-| Mês de competência | Mês e ano, representado pelo primeiro dia do mês          |
+| Mês de Competência | Mês e ano, representado pelo primeiro dia do mês          |
 | Receita ou Despesa | Enumeração com os valores Receita e Despesa               |
 | Estado             | Enumeração com os valores Previsto, Realizado e Cancelado |
 
 ## Relacionamentos
 
-| De           | Para          | Cardinalidade       | Significado                                  |
-| ------------ | ------------- | ------------------- | -------------------------------------------- |
-| Conta        | Lançamento    | 1 para muitos       | Todo lançamento pertence a uma conta         |
-| Categoria    | Lançamento    | 1 para muitos       | Lançamento pertence a uma categoria          |
-| Parcelamento | Lançamento    | 0..1 para 1 ou mais | Parcelamento gera as parcelas                |
-| Lançamento   | Lançamento    | 0..1 para 0..1      | Um estorno aponta para o lançamento original |
-| Conta        | Transferência | 1 para muitos (×2)  | Conta de origem e conta de destino           |
+| De          | Para        | Cardinalidade       | Significado                          |
+| ----------- | ----------- | ------------------- | ------------------------------------ |
+| Account     | Transaction | 1 para muitos       | Todo lançamento pertence a uma conta |
+| Category    | Transaction | 1 para muitos       | Lançamento pertence a uma categoria  |
+| Installment | Transaction | 0..1 para 1 ou mais | Parcelamento gera as parcelas        |
+| Account     | Transfer    | 1 para muitos (×2)  | Conta de origem e conta de destino   |
 
 ## Agregados e fronteiras de consistência
 
-| Agregado      | Raiz          | Observação                                                                |
-| ------------- | ------------- | ------------------------------------------------------------------------- |
-| Lançamento    | Lançamento    | Inclui o vínculo com o lançamento estornado                               |
-| Parcelamento  | Parcelamento  | Criado junto com todas as suas parcelas, em uma única operação atômica    |
-| Transferência | Transferência | Altera duas contas em uma única operação atômica                          |
-| Conta         | Conta         | Não guarda saldo: os saldos são sempre calculados a partir dos movimentos |
-| Categoria     | Categoria     | Independente                                                              |
+| Agregado    | Raiz        | Observação                                                                |
+| ----------- | ----------- | ------------------------------------------------------------------------- |
+| Transaction | Transaction | O Estorno é parte do próprio lançamento                                   |
+| Installment | Installment | Criado junto com todas as suas parcelas, em uma única operação atômica    |
+| Transfer    | Transfer    | Altera duas contas em uma única operação atômica                          |
+| Account     | Account     | Não guarda saldo: os saldos são sempre calculados a partir dos movimentos |
+| Category    | Category    | Independente                                                              |
 
 Depois de gerada, uma parcela é um Lançamento comum: confirmada, cancelada ou
 estornada individualmente, sem alterar o Parcelamento nem as outras parcelas.
-
-## Correspondência com o banco
-
-| Domínio       | Tabela         |
-| ------------- | -------------- |
-| Usuário       | `users`        |
-| Conta         | `accounts`     |
-| Categoria     | `categories`   |
-| Lançamento    | `transactions` |
-| Parcelamento  | `installments` |
-| Transferência | `transfers`    |
-
-O detalhe de colunas e restrições está em `06-modelo-de-dados.md`.
 
 ## Decisões do modelo
 
@@ -223,9 +210,10 @@ O detalhe de colunas e restrições está em `06-modelo-de-dados.md`.
 - **Conta e categoria do Parcelamento são as das parcelas na criação**
   Depois de gerada, cada parcela tem a sua própria conta e categoria.
 
-- **Categoria é obrigatória no Lançamento**
-  A atribuição de uma categoria quando ela não é informada está em
-  `03-regras-de-negocio.md`.
+- **O Estorno é um atributo do Lançamento**
+  Em vez de um segundo lançamento ligado ao original, o Estorno é a Data do
+  Estorno no próprio lançamento. Assim não existe estorno de estorno.
 
 - **Valores derivados não são atributos**
-  Vencido, variações e saldos são calculados na consulta, nunca armazenados.
+  Vencido, Estornado, variações e saldos são calculados na consulta, nunca
+  armazenados.
