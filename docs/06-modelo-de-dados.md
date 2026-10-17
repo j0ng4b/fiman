@@ -1,9 +1,9 @@
 # 06 — Modelo de dados
 
 - **Status:** Rascunho
-- **Versão:** 0.1
-- **Última atualização:** 16-10-2026
-- **SGBD:** a definir
+- **Versão:** 0.2
+- **Última atualização:** 17-10-2026
+- **SGBD:** PostgreSQL
 
 Modelo lógico dos dados, a partir do modelo de domínio. O schema Drizzle é a
 definição física: este documento descreve tabelas, colunas e restrições sem
@@ -12,14 +12,28 @@ repetir tipos específicos de um banco nem SQL.
 ## Convenções
 
 - **Dinheiro:** inteiro em centavos.
-- **Datas:** tipo data (dia civil), sem horário e sem fuso.
-- **Chaves:** inteiro auto incremental.
+- **Chaves:** inteiro gerado pelo banco (identity).
+- **Datas:** tipo data (dia civil), sem horário e sem fuso. No código, trafegam
+  como texto `AAAA-MM-DD`, nunca como objeto de data, para não sofrerem
+  conversão de fuso.
 - **`user_id`:** todas as tabelas, exceto `users`, têm `user_id` obrigatório, com
   padrão 1 (usuário padrão).
 - **Colunas técnicas:** `created_at` em todas as tabelas e `updated_at` em
   `transactions`, ambos em UTC. Não aparecem nas tabelas abaixo.
 - **Valores derivados** (saldos, Vencido, Estornado, variações) não são colunas.
 - **Acesso:** somente por Drizzle.
+
+## Tipos no PostgreSQL
+
+| Lógico           | PostgreSQL         | Observação                                             |
+| ---------------- | ------------------ | ------------------------------------------------------ |
+| Chave            | `integer` identity |                                                        |
+| Dinheiro         | `integer`          | Centavos; até R$ 21.474.836,47 por valor               |
+| Texto            | `text`             |                                                        |
+| Booleano         | `boolean`          |                                                        |
+| Data             | `date`             |                                                        |
+| Instante         | `timestamptz`      | `created_at` e `updated_at`                            |
+| `type`, `status` | `text` com `CHECK` | Valores fixos; sem enum nativo, que dificulta mudanças |
 
 ## DER
 
@@ -194,15 +208,23 @@ testes.
 
 **transfers**
 
-- `amount` maior que zero e origem diferente do destino.
+- `amount` maior que zero
+- Origem diferente do destino.
 
 **Em todas:** nenhuma exclusão em cascata.
 
 ## Índices
 
-Em `transactions`, `(account_id, due_date)`, `(account_id, transaction_date)` e
-`(account_id, accounting_month)`, que sustentam as visões de caixa e de
-competência. Em `transfers`, `(from_account_id, date)` e `(to_account_id, date)`.
+Para sustentar as visões de caixa e de competência em `transactions`:
+
+- `(account_id, due_date)`
+- `(account_id, transaction_date)`
+- `(account_id, accounting_month)`
+
+Em `transfers`:
+
+- `(from_account_id, date)`
+- `(to_account_id, date)`
 
 ## Decisões de modelagem
 
