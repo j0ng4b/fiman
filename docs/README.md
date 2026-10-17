@@ -14,7 +14,7 @@ junto da fatia de código que o exigir.
 | 03  | [Regras de negócio](03-regras-de-negocio.md)                  | RN-xxx                                                   |
 | 05  | [Modelo de domínio](05-modelo-de-dominio.md)                  | Entidades, relacionamentos e fronteiras de consistência  |
 | 06  | [Modelo de dados](06-modelo-de-dados.md)                      | DER, tabelas e decisões de modelagem                     |
-| 09  | [Registros de decisão de arquitetura (ADR)](09-adr/README.md) | Registros de decisão de arquitetura                      |
+| 09  | [Registros de decisão de arquitetura (ADR)](09-adr/README.md) | Decisões de arquitetura, uma por arquivo                 |
 
 ## Sob demanda
 
@@ -48,10 +48,14 @@ não renumerar os documentos existentes.
 | `Revisado`   | Relido e consistente com os documentos de que deriva; pronto para implementar |
 | `Verificado` | O sistema construído segue o documento, confirmado por código e testes        |
 | `Obsoleto`   | Substituído ou descartado; mantido só para histórico                          |
+| `Proposto`   | Usado apenas nos ADRs para indicar que um documento foi proposto              |
+| `Aceito`     | Usado apenas nos ADRs aceitos.                                                |
 
 Um documento só é `Revisado` se os de que deriva já estão `Revisado` ou
 `Verificado`. Mudar o significado de um documento devolve-o a `Rascunho`;
 corrigir texto, não.
+
+**Versão:** Major = revisões, Minor = rascunhos.
 
 **Prioridade (MoSCoW):** `Must`, `Should`, `Could`, `Won't`.
 
