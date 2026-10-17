@@ -1,4 +1,4 @@
-# ADR-0001 - Monorepo
+# ADR-0001 — Monorepo
 
 - **Status:** Aceito
 - **Data:** 17-10-2026

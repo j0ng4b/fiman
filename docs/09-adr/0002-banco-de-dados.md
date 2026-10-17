@@ -1,4 +1,4 @@
-# ADR-0002 - Banco de dados: PostgreSQL
+# ADR-0002 — Banco de dados: PostgreSQL
 
 - **Status:** Aceito
 - **Data:** 17-10-2026

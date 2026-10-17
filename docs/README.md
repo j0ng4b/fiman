@@ -6,14 +6,15 @@ junto da fatia de código que o exigir.
 
 ## Documentos
 
-| #   | Documento                                    | Conteúdo                                                 |
-| --- | -------------------------------------------- | -------------------------------------------------------- |
-| 00  | [Glossário](00-glossario.md)                 | Linguagem ubíqua: o significado de cada termo do sistema |
-| 01  | [Visão e escopo](01-visao.md)                | Problema, objetivo, escopo, stakeholders                 |
-| 02  | [Requisitos](02-requisitos.md)               | RF e RNF com prioridade e critérios de aceite            |
-| 03  | [Regras de negócio](03-regras-de-negocio.md) | RN-xxx                                                   |
-| 05  | [Modelo de domínio](05-modelo-de-dominio.md) | Entidades, relacionamentos e fronteiras de consistência  |
-| 06  | [Modelo de dados](06-modelo-de-dados.md)     | DER, tabelas e decisões de modelagem                     |
+| #   | Documento                                                     | Conteúdo                                                 |
+| --- | ------------------------------------------------------------- | -------------------------------------------------------- |
+| 00  | [Glossário](00-glossario.md)                                  | Linguagem ubíqua: o significado de cada termo do sistema |
+| 01  | [Visão e escopo](01-visao.md)                                 | Problema, objetivo, escopo, stakeholders                 |
+| 02  | [Requisitos](02-requisitos.md)                                | RF e RNF com prioridade e critérios de aceite            |
+| 03  | [Regras de negócio](03-regras-de-negocio.md)                  | RN-xxx                                                   |
+| 05  | [Modelo de domínio](05-modelo-de-dominio.md)                  | Entidades, relacionamentos e fronteiras de consistência  |
+| 06  | [Modelo de dados](06-modelo-de-dados.md)                      | DER, tabelas e decisões de modelagem                     |
+| 09  | [Registros de decisão de arquitetura (ADR)](09-adr/README.md) | Registros de decisão de arquitetura                      |
 
 ## Sob demanda
 
@@ -23,7 +24,6 @@ não renumerar os documentos existentes.
 - `04-casos-de-uso/`: UC-xxx
 - `07-diagramas/`: sequência, estados, atividades
 - `08-prototipos/`: telas (TL-xxx)
-- `09-adr/`: decisões de arquitetura, registradas no momento da decisão
 - `10-rastreabilidade.md`: requisito → caso de uso → tela → endpoint → teste,
   quando houver artefatos suficientes
 
