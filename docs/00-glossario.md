@@ -1,8 +1,8 @@
 # 00 — Glossário e Linguagem Ubíqua
 
-- **Status:** Revisado
-- **Versão:** 0.4
-- **Última atualização:** 16-10-2026
+- **Status:** Rascunho
+- **Versão:** 0.5
+- **Última atualização:** 17-10-2026
 
 Este documento estabelece a Linguagem Ubíqua do sistema: o vocabulário comum dos
 documentos, do código e do banco. Os documentos usam termos em português; o
@@ -22,7 +22,7 @@ Data atual do sistema (dia civil).
 
 **Em código:** `today`, calculada pela aplicação.
 
-### Data de Consulta ($D$)
+### Data de Consulta (D)
 
 Data para a qual se consulta o saldo ou a projeção. Não é armazenada: é o
 parâmetro da consulta.
@@ -54,8 +54,9 @@ Mês ao qual um lançamento pertence para fins de planejamento.
 ### Reserva (Competência Antecipada)
 
 Lançamento, de receita ou despesa, cujo Mês de Competência é anterior ao mês da
-sua Data Prevista. Usada para contas que precisam ser separadas no planejamento
-do mês anterior. Não move dinheiro e não altera o caixa nem a visão diária.
+sua Data Prevista. Usada para contas cujo valor precisa ser separado em um mês
+anterior ao do vencimento. Não move dinheiro e não altera o caixa nem a visão
+diária.
 
 **Em código:** derivada, quando `accounting_month` é anterior ao mês de
 `due_date`.
@@ -84,9 +85,9 @@ lançamentos previstos até essa data.
 
 ### Saldo Acumulado
 
-Saldo Inicial somado ao Resultado de cada mês (ou ano), em sequência, pelo Eixo
-de Competência. Existe a versão **confirmada** (só realizados) e a **projetada**
-(realizados e previstos).
+Saldo Inicial somado, período a período, ao Resultado e às Transferências
+recebidas e enviadas. Existe a versão **confirmada** (só realizados) e a
+**projetada** (realizados e previstos).
 
 **Em código:** `cumulative_balance`, calculado.
 
@@ -208,9 +209,16 @@ Divergência entre o planejado e o executado:
 
 Correção de um lançamento Realizado: o lançamento é marcado como estornado, com
 a Data do Estorno, e o seu efeito é anulado a partir dessa data. O lançamento
-permanece intacto e visível.
+permanece visível, com os seus valores e datas.
 
 **Em código:** `reversal_date`.
+
+### Estornado (Derivado)
+
+Condição de um lançamento Realizado que tem Data do Estorno. Não é salvo no
+banco de dados.
+
+**Em código:** `is_reversed`, calculado.
 
 ### Data do Estorno
 
@@ -285,7 +293,7 @@ automaticamente.
 
 ### Parcela
 
-Lançamento gerado por um Parcelamento, numerado de 1 a N, com valores e datas
-próprios.
+Lançamento gerado por um Parcelamento, numerado pela posição no Parcelamento,
+com valores e datas próprios.
 
 **Em código:** `transactions` com `installment_id` e `installment_number`.
