@@ -1,8 +1,8 @@
 # 01 — Visão e escopo
 
-- **Status:** Revisado
-- **Versão:** 0.4
-- **Última atualização:** 13-10-2026
+- **Status:** Rascunho
+- **Versão:** 0.5
+- **Última atualização:** 17-10-2026
 
 ## 1. Problema
 
@@ -38,7 +38,7 @@ desenvolvimento de sistemas:
   entre documentos, código e banco.
 
 - **Arquitetura e decisões:** monorepo com NestJS e Vue, persistência com
-  Drizzle, e decisões de arquitetura registradas em ADRs.
+  Drizzle e PostgreSQL, e decisões de arquitetura registradas em ADRs.
 
 - **Implementação:** fatias verticais ponta a ponta (Vue, NestJS e Drizzle), com
   testes sobre as regras de negócio.
@@ -58,7 +58,7 @@ desenvolvimento de sistemas:
   - Registro de receitas e despesas, previstas ou realizadas, classificadas por
     categoria.
 
-  - Parcelamento: geração automática das parcelas de um lançamento.
+  - Parcelamento: geração automática das Parcelas mensais de uma operação.
 
   - Acompanhamento da **variação** entre previsto e realizado:
     - **Data:** Data Prevista vs. Data Realizada (adiantamento ou atraso).
@@ -66,11 +66,12 @@ desenvolvimento de sistemas:
     - **Valor:** Valor Previsto vs. Valor Realizado.
 
   - **Reserva:** um lançamento pode ter Mês de Competência anterior ao mês do
-    vencimento. Ele passa a contar no planejamento desse mês e do ano
-    correspondente, sem alterar o caixa.
+    vencimento. Ele passa a contar nas visões mensal e anual do mês e ano da
+    Reserva.
 
-  - **Correção por estorno:** lançamentos realizados não são editados nem
-    cancelados; erros se corrigem por estorno, que preserva o histórico.
+  - **Correção por estorno:** lançamentos realizados não têm valores nem datas
+    editados e não podem ser cancelados; erros se corrigem por estorno, que
+    preserva o histórico.
 
 - **Gestão de Contas, Categorias e Transferências:**
   - Contas, cada uma com saldo inicial e data de início do rastreamento.
@@ -88,8 +89,8 @@ desenvolvimento de sistemas:
 
   - Projeção de saldo com base nos lançamentos previstos.
 
-  - Indicadores visuais de variação e do estado dos lançamentos (previsto,
-    realizado, vencido).
+  - Indicadores visuais de variação, do estado dos lançamentos e de quais estão
+    vencidos.
 
 ### Depois do MVP
 
@@ -108,20 +109,20 @@ desenvolvimento de sistemas:
 
 ## 6. Premissas e restrições
 
-| Tipo      | Descrição                                                                                                                   |
-| --------- | --------------------------------------------------------------------------------------------------------------------------- |
-| Premissa  | O uso inicial será estritamente pessoal (Single-User), rodando em ambiente controlado.                                      |
-| Premissa  | A modelagem do banco de dados deve prever uma futura migração para suporte a múltiplos usuários sem refatoração destrutiva. |
-| Premissa  | A reserva é uma atribuição de competência: não movimenta dinheiro nem altera o saldo em caixa ou a visão diária.            |
-| Premissa  | Todos os valores são em reais (BRL), com uma única moeda.                                                                   |
-| Restrição | **Stack:** Frontend em Vue.js (com Tailwind CSS), Backend em NestJS e ORM com Drizzle.                                      |
+| Tipo      | Descrição                                                                                                                  |
+| --------- | -------------------------------------------------------------------------------------------------------------------------- |
+| Premissa  | O uso inicial será estritamente pessoal (Single-User), rodando em ambiente controlado                                      |
+| Premissa  | A modelagem do banco de dados deve prever uma futura migração para suporte a múltiplos usuários sem refatoração destrutiva |
+| Premissa  | A reserva é uma atribuição de competência: não movimenta dinheiro nem altera o saldo em caixa ou a visão diária            |
+| Premissa  | Todos os valores são em reais (BRL), com uma única moeda                                                                   |
+| Restrição | **Stack:** Frontend em Vue.js (com Tailwind CSS), Backend em NestJS, ORM com Drizzle e banco de dados PostgreSQL           |
 
 ## 7. Riscos
 
 | Risco                                                                  | Probabilidade | Impacto | Mitigação                                                                                                                                                                 |
 | ---------------------------------------------------------------------- | ------------- | ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Escopo crescer além do MVP                                             | Média         | Alto    | Manter a lista "Fora do escopo" estrita e priorizar regras de negócio essenciais.                                                                                         |
-| Complexidade na projeção e recalculo de parcelas                       | Média         | Médio   | Modelar explicitamente o ciclo de vida do lançamento desde a camada do banco de dados.                                                                                    |
+| Complexidade na projeção e recálculo de parcelas                       | Média         | Médio   | Modelar explicitamente o ciclo de vida do lançamento desde a camada do banco de dados.                                                                                    |
 | Dois eixos de tempo (caixa e competência) gerarem leituras divergentes | Média         | Médio   | Documentar a diferença, nomear os eixos nas telas ("Caixa" e "Competência") e cobrir com testes os casos em que pagamento e competência caem em meses ou anos diferentes. |
 | Documentação excessiva                                                 | Média         | Médio   | Documentos mínimos; criar os demais sob demanda, junto de cada fatia de código.                                                                                           |
 
