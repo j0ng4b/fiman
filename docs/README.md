@@ -61,6 +61,13 @@ corrigir texto, não.
 
 **Diagramas:** Mermaid em blocos ` ```mermaid `. Renderizam direto no GitHub.
 
+**Termos do glossário:** ao se referir a um conceito do glossário, usar a grafia
+dele, com inicial maiúscula (ex.: Data Prevista, Previsto, Estorno). Os
+substantivos comuns lançamento, conta, categoria, receita e despesa ficam em
+minúsculas no texto corrido. A primeira ocorrência de cada termo em uma seção
+leva link para o glossário (no glossário, em cada entrada; rótulos de grupo não
+contam).
+
 ## Princípios
 
 - Uma regra não cita outra regra. Quando depende de um conceito, usa o termo do
