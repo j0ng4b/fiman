@@ -11,6 +11,9 @@
     "type": "git",
     "url": "git+https://github.com/j0ng4b/fiman.git"
   },
+  "engines": {
+    "node": ">=22"
+  },
   "workspaces": [
     "apps/*",
     "packages/*"
