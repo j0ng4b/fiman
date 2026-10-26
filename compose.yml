@@ -1,31 +1,31 @@
 services:
-  database:
-    image: postgres:17-alpine
-    container_name: fiman-database
-    ports:
-      - "5432:5432"
-    env_file:
-      - path: .env
-        required: true
-    environment:
-      POSTGRES_USER: ${DB_USER}
-      POSTGRES_PASSWORD: ${DB_PASSWORD}
-      POSTGRES_DB: ${DB_NAME}
-    volumes:
-      - pgdata:/var/lib/postgresql/data
-    networks:
-      - fiman-backend
-    restart: always
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${DB_USER} -d ${DB_NAME}"]
-      interval: 1m
-      timeout: 15s
-      retries: 5
-      start_period: 10s
+    database:
+        image: postgres:17-alpine
+        container_name: fiman-database
+        ports:
+            - "5432:5432"
+        env_file:
+            - path: .env
+              required: true
+        environment:
+            POSTGRES_USER: ${DB_USER}
+            POSTGRES_PASSWORD: ${DB_PASSWORD}
+            POSTGRES_DB: ${DB_NAME}
+        volumes:
+            - pgdata:/var/lib/postgresql/data
+        networks:
+            - fiman-backend
+        restart: always
+        healthcheck:
+            test: ["CMD-SHELL", "pg_isready -U ${DB_USER} -d ${DB_NAME}"]
+            interval: 1m
+            timeout: 15s
+            retries: 5
+            start_period: 10s
 
 volumes:
-  pgdata:
+    pgdata:
 
 networks:
-  fiman-backend:
-    attachable: true
+    fiman-backend:
+        attachable: true
