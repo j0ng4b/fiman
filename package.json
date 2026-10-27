@@ -1,5 +1,4 @@
 {
-  "$schema": "https://json.schemastore.org/package.json",
   "name": "fiman",
   "version": "0.0.1",
   "description": "Sistema para controle de finanças pessoal.",
