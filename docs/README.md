@@ -1,4 +1,4 @@
-# Documentação — Fiman
+# Documentação - Fiman
 
 Documentação do projeto, escrita de forma incremental: cada documento tem o
 mínimo necessário para começar a construir. O que ainda não existe é criado
@@ -6,80 +6,47 @@ junto da fatia de código que o exigir.
 
 ## Documentos
 
-| #   | Documento                                                     | Conteúdo                                                 |
-| --- | ------------------------------------------------------------- | -------------------------------------------------------- |
-| 00  | [Glossário](00-glossario.md)                                  | Linguagem ubíqua: o significado de cada termo do sistema |
-| 01  | [Visão e escopo](01-visao.md)                                 | Problema, objetivo, escopo, stakeholders                 |
-| 02  | [Requisitos](02-requisitos.md)                                | RF e RNF com prioridade e critérios de aceite            |
-| 03  | [Regras de negócio](03-regras-de-negocio.md)                  | RN-xxx                                                   |
-| 05  | [Modelo de domínio](05-modelo-de-dominio.md)                  | Entidades, relacionamentos e fronteiras de consistência  |
-| 06  | [Modelo de dados](06-modelo-de-dados.md)                      | DER, tabelas e decisões de modelagem                     |
-| 09  | [Registros de decisão de arquitetura (ADR)](09-adr/README.md) | Decisões de arquitetura, uma por arquivo                 |
-
-## Sob demanda
-
-Criados junto de cada fatia de código. A numeração fica reservada para
-não renumerar os documentos existentes.
-
-- `04-casos-de-uso/`: UC-xxx
-- `07-diagramas/`: sequência, estados, atividades
-- `08-prototipos/`: telas (TL-xxx)
-- `10-rastreabilidade.md`: requisito → caso de uso → tela → endpoint → teste,
-  quando houver artefatos suficientes
+| Doc                                    | Conteúdo                                             |
+| -------------------------------------- | ---------------------------------------------------- |
+| [Glossário](glossario.md)              | O que cada termo significa e como se chama no código |
+| [Visão](visao.md)                      | Problema, objetivo e escopo                          |
+| [Requisitos](requisitos.md)            | O que o sistema deve fazer (RF) e qualidades (RNF)   |
+| [Regras](regras.md)                    | Regras de negócio e fórmulas de cálculo (RN)         |
+| [Modelo de dados](modelo-de-dados.md)  | Tabelas, colunas e restrições do banco               |
+| [Decisões técnicas](adr/README.md)     | Decisões técnicas, um arquivo por decisão            |
+| [Casos de uso](casos-de-uso/README.md) | Casos de uso do sistema (criado sob demanda)         |
+| [Protótipos](prototipos/README.md)     | Protótipos do sistema (criado sob demanda)           |
 
 ## Convenções
 
 **IDs** (nunca reutilizar um ID removido):
 
-| Prefixo    | Artefato                |
+| Prefixo    | O que é                 |
 | ---------- | ----------------------- |
 | `RF-001`   | Requisito funcional     |
 | `RNF-001`  | Requisito não funcional |
 | `RN-001`   | Regra de negócio        |
-| `UC-001`   | Caso de uso             |
-| `TL-001`   | Tela / protótipo        |
-| `ADR-0001` | Decisão de arquitetura  |
+| `ADR-0001` | Decisão técnica         |
 
-**Status** (cabeçalho de cada documento, que é a única fonte dessa informação):
+**Status** (no cabeçalho de cada documento):
 
-| Status       | Significado                                                                   |
-| ------------ | ----------------------------------------------------------------------------- |
-| `Rascunho`   | Em escrita; pode mudar sem aviso e tem pendências conhecidas                  |
-| `Revisado`   | Relido e consistente com os documentos de que deriva; pronto para implementar |
-| `Verificado` | O sistema construído segue o documento, confirmado por código e testes        |
-| `Obsoleto`   | Substituído ou descartado; mantido só para histórico                          |
-| `Proposto`   | Usado apenas nos ADRs para indicar que um documento foi proposto              |
-| `Aceito`     | Usado apenas nos ADRs aceitos.                                                |
+- `Rascunho`: em escrita, pode mudar.
+- `Pronto`: revisado e consistente com os outros; pode implementar.
 
-Um documento só é `Revisado` se os de que deriva já estão `Revisado` ou
-`Verificado`. Mudar o significado de um documento devolve-o a `Rascunho`;
-corrigir texto, não.
+**Prioridade:** `Must` e `Should` entram no MVP; `Won't` fica para depois.
 
-**Versão:** Major = revisões, Minor = rascunhos.
-
-**Prioridade (MoSCoW):** `Must`, `Should`, `Could`, `Won't`.
-
-**Diagramas:** Mermaid em blocos ` ```mermaid `. Renderizam direto no GitHub.
-
-**Termos do glossário:** ao se referir a um conceito do glossário, usar a grafia
-dele, com inicial maiúscula (ex.: Data Prevista, Previsto, Estorno). Os
-substantivos comuns lançamento, conta, categoria, receita e despesa ficam em
-minúsculas no texto corrido. A primeira ocorrência de cada termo em uma seção
-leva link para o glossário (no glossário, em cada entrada; rótulos de grupo não
-contam).
+**Diagramas:** Mermaid em blocos ` ```mermaid `, que o GitHub renderiza.
 
 ## Princípios
 
-- Uma regra não cita outra regra. Quando depende de um conceito, usa o termo do
-  glossário.
-
-- Cada fato mora em um só lugar.
-
-- Os vínculos entre artefatos (requisito, caso de uso, tela, teste) ficam só na
-  matriz de rastreabilidade.
+- **Um nome por conceito.** O termo do glossário é o que se usa nos docs, e o
+  nome da coluna é o que se usa no código.
+- **Cada fato mora em um só lugar.** Fórmulas ficam em `regras`, estrutura
+  do banco em `modelo-de-dados`. Os outros docs apontam para lá em vez de
+  copiar.
+- **Regra curta e testável.** Se não dá para escrever um teste para ela, ela
+  está vaga.
 
 ## Fluxo de trabalho
 
-Documentar o mínimo → implementar uma fatia vertical → voltar e atualizar o que
-a prática mostrou. Se o escopo mudar, atualizar o requisito (`02`) e as regras
-(`03`) antes de codificar.
+Documentar > implementar uma fatia (tela, API e banco) > voltar e atualizar o que a prática mostrou. Se o escopo mudar, atualizar `requisitos` e `regras` antes de codar.
