@@ -22,6 +22,6 @@ Usar um único repositório (monorepo).
 
 ## Consequências
 
-- **Positivas:** um link, commits atômicos entre front/back/docs.
-- **Negativas:** CI precisa filtrar por pasta.
+- **Positivas:** um link, commits atômicos entre front, back e docs.
+- **Negativas / custos:** a CI precisa filtrar por pasta.
 - **Riscos:** nenhum relevante no tamanho atual.
