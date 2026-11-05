@@ -33,7 +33,7 @@ junto da fatia de código que o exigir.
 - `Rascunho`: em escrita, pode mudar.
 - `Pronto`: revisado e consistente com os outros; pode implementar.
 
-**Prioridade:** `Must` e `Should` entram no MVP; `Won't` fica para depois.
+**Prioridade:** `Must`, `Should` e `Could` entram no MVP; `Won't` fica para depois.
 
 **Diagramas:** Mermaid em blocos ` ```mermaid `, que o GitHub renderiza.
 
