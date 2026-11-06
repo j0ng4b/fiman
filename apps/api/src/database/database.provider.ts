@@ -3,6 +3,7 @@ import { ConfigService } from "@nestjs/config";
 import { DrizzleQueryError, sql } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/node-postgres";
 import { DATABASE } from "./database.constants.ts";
+import { DatabaseConnectionError } from "./database.exceptions.ts";
 
 export type Database = ReturnType<typeof drizzle>;
 
@@ -21,6 +22,7 @@ export const DatabaseProvider = {
             }
 
             // TODO: Log fail to connect to database
+            throw new DatabaseConnectionError("Fail to connect to database!");
         }
 
         // TODO: Log database connected success fully
