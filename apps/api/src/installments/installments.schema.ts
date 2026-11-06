@@ -7,6 +7,7 @@ import {
     text,
     timestamp,
 } from "drizzle-orm/pg-core";
+import { usersTable } from "../users/users.schema.ts";
 import { accountsTable } from "../accounts/accounts.schema.ts";
 import { categoriesTable } from "../categories/categories.schema.ts";
 
@@ -19,6 +20,9 @@ export const installmentsTable = snakeCase.table("installments", {
     totalAmout: integer().notNull(),
     installmentCount: smallint().notNull(),
     firstInstallmentDate: date({ mode: "string" }).notNull(),
+    userId: integer()
+        .references(() => usersTable.id, { onDelete: "restrict" })
+        .notNull(),
     accountId: integer()
         .references(() => accountsTable.id, { onDelete: "restrict" })
         .notNull(),

@@ -1,0 +1,2 @@
+ALTER TABLE "installments" ADD COLUMN "user_id" integer NOT NULL;--> statement-breakpoint
+ALTER TABLE "installments" ADD CONSTRAINT "installments_user_id_users_id_fkey" FOREIGN KEY ("user_id") REFERENCES "users"("id") ON DELETE RESTRICT;
