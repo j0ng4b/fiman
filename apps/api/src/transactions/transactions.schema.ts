@@ -22,7 +22,7 @@ export const transactionsTable = snakeCase.table("transactions", {
     description: text().notNull(),
     amount: integer().notNull(),
     dueDate: date({ mode: "string" }).notNull(),
-    paidAmout: integer(),
+    paidAmount: integer(),
     transactionDate: date({ mode: "string" }),
     accountingMonth: date({ mode: "string" }).notNull(),
     reversalDate: date({ mode: "string" }),

@@ -17,7 +17,7 @@ export const installmentsTable = snakeCase.table("installments", {
     id: integer().generatedAlwaysAsIdentity().primaryKey(),
     type: installmentType().notNull(),
     description: text().notNull(),
-    totalAmout: integer().notNull(),
+    totalAmount: integer().notNull(),
     installmentCount: smallint().notNull(),
     firstInstallmentDate: date({ mode: "string" }).notNull(),
     userId: integer()
