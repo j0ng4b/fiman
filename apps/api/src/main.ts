@@ -1,7 +1,8 @@
-import { NestFactory } from "@nestjs/core";
-import { StandardSchemaValidationPipe } from "@nestjs/common";
-import { type NestExpressApplication } from "@nestjs/platform-express";
-import { AppModule } from "./app.module.ts";
+import { StandardSchemaValidationPipe } from '@nestjs/common';
+import { NestFactory } from '@nestjs/core';
+import type { NestExpressApplication } from '@nestjs/platform-express';
+
+import { AppModule } from './app.module.ts';
 
 async function bootstrap(): Promise<void> {
     const app = await NestFactory.create<NestExpressApplication>(AppModule);

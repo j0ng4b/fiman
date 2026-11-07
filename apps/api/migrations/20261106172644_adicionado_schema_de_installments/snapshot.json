@@ -2,24 +2,16 @@
   "version": "8",
   "dialect": "postgres",
   "id": "b2aeac77-36f9-45ac-bcbf-47ad9cb0ecc5",
-  "prevIds": [
-    "42e7a3bc-90e5-4b4b-b363-16d85c055d17"
-  ],
+  "prevIds": ["42e7a3bc-90e5-4b4b-b363-16d85c055d17"],
   "ddl": [
     {
-      "values": [
-        "I",
-        "E"
-      ],
+      "values": ["I", "E"],
       "name": "category_type",
       "entityType": "enums",
       "schema": "public"
     },
     {
-      "values": [
-        "I",
-        "E"
-      ],
+      "values": ["I", "E"],
       "name": "installment_type",
       "entityType": "enums",
       "schema": "public"
@@ -530,14 +522,10 @@
     },
     {
       "nameExplicit": false,
-      "columns": [
-        "user_id"
-      ],
+      "columns": ["user_id"],
       "schemaTo": "public",
       "tableTo": "users",
-      "columnsTo": [
-        "id"
-      ],
+      "columnsTo": ["id"],
       "onUpdate": "NO ACTION",
       "onDelete": "RESTRICT",
       "name": "accounts_user_id_users_id_fkey",
@@ -547,14 +535,10 @@
     },
     {
       "nameExplicit": false,
-      "columns": [
-        "user_id"
-      ],
+      "columns": ["user_id"],
       "schemaTo": "public",
       "tableTo": "users",
-      "columnsTo": [
-        "id"
-      ],
+      "columnsTo": ["id"],
       "onUpdate": "NO ACTION",
       "onDelete": "RESTRICT",
       "name": "categories_user_id_users_id_fkey",
@@ -564,14 +548,10 @@
     },
     {
       "nameExplicit": false,
-      "columns": [
-        "account_id"
-      ],
+      "columns": ["account_id"],
       "schemaTo": "public",
       "tableTo": "accounts",
-      "columnsTo": [
-        "id"
-      ],
+      "columnsTo": ["id"],
       "onUpdate": "NO ACTION",
       "onDelete": "RESTRICT",
       "name": "installments_account_id_accounts_id_fkey",
@@ -581,14 +561,10 @@
     },
     {
       "nameExplicit": false,
-      "columns": [
-        "category_id"
-      ],
+      "columns": ["category_id"],
       "schemaTo": "public",
       "tableTo": "categories",
-      "columnsTo": [
-        "id"
-      ],
+      "columnsTo": ["id"],
       "onUpdate": "NO ACTION",
       "onDelete": "RESTRICT",
       "name": "installments_category_id_categories_id_fkey",
@@ -598,14 +574,10 @@
     },
     {
       "nameExplicit": false,
-      "columns": [
-        "from_account_id"
-      ],
+      "columns": ["from_account_id"],
       "schemaTo": "public",
       "tableTo": "accounts",
-      "columnsTo": [
-        "id"
-      ],
+      "columnsTo": ["id"],
       "onUpdate": "NO ACTION",
       "onDelete": "RESTRICT",
       "name": "transfers_from_account_id_accounts_id_fkey",
@@ -615,14 +587,10 @@
     },
     {
       "nameExplicit": false,
-      "columns": [
-        "to_account_id"
-      ],
+      "columns": ["to_account_id"],
       "schemaTo": "public",
       "tableTo": "accounts",
-      "columnsTo": [
-        "id"
-      ],
+      "columnsTo": ["id"],
       "onUpdate": "NO ACTION",
       "onDelete": "RESTRICT",
       "name": "transfers_to_account_id_accounts_id_fkey",
@@ -632,14 +600,10 @@
     },
     {
       "nameExplicit": false,
-      "columns": [
-        "user_id"
-      ],
+      "columns": ["user_id"],
       "schemaTo": "public",
       "tableTo": "users",
-      "columnsTo": [
-        "id"
-      ],
+      "columnsTo": ["id"],
       "onUpdate": "NO ACTION",
       "onDelete": "RESTRICT",
       "name": "transfers_user_id_users_id_fkey",
@@ -648,9 +612,7 @@
       "table": "transfers"
     },
     {
-      "columns": [
-        "id"
-      ],
+      "columns": ["id"],
       "nameExplicit": false,
       "name": "accounts_pkey",
       "schema": "public",
@@ -658,9 +620,7 @@
       "entityType": "pks"
     },
     {
-      "columns": [
-        "id"
-      ],
+      "columns": ["id"],
       "nameExplicit": false,
       "name": "categories_pkey",
       "schema": "public",
@@ -668,9 +628,7 @@
       "entityType": "pks"
     },
     {
-      "columns": [
-        "id"
-      ],
+      "columns": ["id"],
       "nameExplicit": false,
       "name": "installments_pkey",
       "schema": "public",
@@ -678,9 +636,7 @@
       "entityType": "pks"
     },
     {
-      "columns": [
-        "id"
-      ],
+      "columns": ["id"],
       "nameExplicit": false,
       "name": "transfers_pkey",
       "schema": "public",
@@ -688,9 +644,7 @@
       "entityType": "pks"
     },
     {
-      "columns": [
-        "id"
-      ],
+      "columns": ["id"],
       "nameExplicit": false,
       "name": "users_pkey",
       "schema": "public",
