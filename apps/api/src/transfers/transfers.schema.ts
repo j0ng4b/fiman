@@ -2,6 +2,7 @@ import { sql } from "drizzle-orm";
 import {
     check,
     date,
+    foreignKey,
     index,
     integer,
     snakeCase,
@@ -18,12 +19,8 @@ export const transfersTable = snakeCase.table(
         amount: integer().notNull(),
         date: date({ mode: "string" }).notNull(),
         description: text(),
-        fromAccountId: integer()
-            .references(() => accountsTable.id, { onDelete: "restrict" })
-            .notNull(),
-        toAccountId: integer()
-            .references(() => accountsTable.id, { onDelete: "restrict" })
-            .notNull(),
+        fromAccountId: integer().notNull(),
+        toAccountId: integer().notNull(),
         userId: integer()
             .references(() => usersTable.id, { onDelete: "restrict" })
             .notNull(),
@@ -37,6 +34,18 @@ export const transfersTable = snakeCase.table(
             "transfers_distinct_accounts_ck",
             sql`${table.fromAccountId} <> ${table.toAccountId}`,
         ),
+
+        foreignKey({
+            name: "transfers_from_account_user_fk",
+            columns: [table.fromAccountId, table.userId],
+            foreignColumns: [accountsTable.id, accountsTable.userId],
+        }).onDelete("restrict"),
+
+        foreignKey({
+            name: "transfers_to_account_user_fk",
+            columns: [table.toAccountId, table.userId],
+            foreignColumns: [accountsTable.id, accountsTable.userId],
+        }).onDelete("restrict"),
 
         index("transfers_from_account_date_idx").on(
             table.fromAccountId,

@@ -8,6 +8,7 @@ import {
     snakeCase,
     text,
     timestamp,
+    unique,
 } from "drizzle-orm/pg-core";
 import { usersTable } from "../users/users.schema.ts";
 import { accountsTable } from "../accounts/accounts.schema.ts";
@@ -25,9 +26,7 @@ export const installmentsTable = snakeCase.table(
         userId: integer()
             .references(() => usersTable.id, { onDelete: "restrict" })
             .notNull(),
-        accountId: integer()
-            .references(() => accountsTable.id, { onDelete: "restrict" })
-            .notNull(),
+        accountId: integer().notNull(),
         categoryId: integer().notNull(),
         createdAt: timestamp({ withTimezone: true, mode: "string" })
             .defaultNow()
@@ -40,10 +39,22 @@ export const installmentsTable = snakeCase.table(
             sql`${table.totalAmount} > 0`,
         ),
 
+        unique("installments_id_user_uq").on(table.id, table.userId),
+
         foreignKey({
-            name: "installments_category_type_fk",
-            columns: [table.categoryId, table.type],
-            foreignColumns: [categoriesTable.id, categoriesTable.type],
+            name: "installments_account_user_fk",
+            columns: [table.accountId, table.userId],
+            foreignColumns: [accountsTable.id, accountsTable.userId],
+        }).onDelete("restrict"),
+
+        foreignKey({
+            name: "installments_category_user_type_fk",
+            columns: [table.categoryId, table.userId, table.type],
+            foreignColumns: [
+                categoriesTable.id,
+                categoriesTable.userId,
+                categoriesTable.type,
+            ],
         }).onDelete("restrict"),
     ],
 );

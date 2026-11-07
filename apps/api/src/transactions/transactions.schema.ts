@@ -34,13 +34,9 @@ export const transactionsTable = snakeCase.table(
         userId: integer()
             .references(() => usersTable.id, { onDelete: "restrict" })
             .notNull(),
-        accountId: integer()
-            .references(() => accountsTable.id, { onDelete: "restrict" })
-            .notNull(),
+        accountId: integer().notNull(),
         categoryId: integer().notNull(),
-        installmentId: integer().references(() => installmentsTable.id, {
-            onDelete: "restrict",
-        }),
+        installmentId: integer(),
         installmentNumber: integer(),
         createdAt: timestamp({ withTimezone: true, mode: "string" })
             .defaultNow()
@@ -87,9 +83,25 @@ export const transactionsTable = snakeCase.table(
         ),
 
         foreignKey({
-            name: "transactions_category_type_fk",
-            columns: [table.categoryId, table.type],
-            foreignColumns: [categoriesTable.id, categoriesTable.type],
+            name: "transactions_account_user_fk",
+            columns: [table.accountId, table.userId],
+            foreignColumns: [accountsTable.id, accountsTable.userId],
+        }).onDelete("restrict"),
+
+        foreignKey({
+            name: "transactions_category_user_type_fk",
+            columns: [table.categoryId, table.userId, table.type],
+            foreignColumns: [
+                categoriesTable.id,
+                categoriesTable.userId,
+                categoriesTable.type,
+            ],
+        }).onDelete("restrict"),
+
+        foreignKey({
+            name: "transactions_installment_user_fk",
+            columns: [table.installmentId, table.userId],
+            foreignColumns: [installmentsTable.id, installmentsTable.userId],
         }).onDelete("restrict"),
 
         unique("transactions_installments_uq").on(

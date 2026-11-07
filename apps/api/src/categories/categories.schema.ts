@@ -30,7 +30,12 @@ export const categoriesTable = snakeCase.table(
     },
 
     (table) => [
-        unique("categories_id_type_uq").on(table.id, table.type),
+        unique("categories_id_user_type_uq").on(
+            table.id,
+            table.userId,
+            table.type,
+        ),
+
         unique("categories_user_type_name_uq").on(
             table.userId,
             table.type,
