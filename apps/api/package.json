@@ -1,15 +1,17 @@
 {
   "name": "@fiman/api",
   "version": "0.0.1",
-  "main": "./dist/main",
-  "type": "module",
   "private": true,
+  "type": "module",
+  "main": "./dist/main",
   "scripts": {
     "build": "nest build",
     "start:dev": "nest start --watch",
     "start:prod": "node .",
     "db:migrate": "drizzle-kit migrate",
-    "db:generate": "drizzle-kit generate --name"
+    "db:generate": "drizzle-kit generate --name",
+    "fmt": "oxfmt",
+    "fmt:check": "oxfmt --check"
   },
   "dependencies": {
     "@nestjs/common": "^12.4.0",
@@ -26,6 +28,7 @@
     "@nestjs/schematics": "^12.0.13",
     "@types/node": "^26.6.6",
     "drizzle-kit": "^1.0.0-rc.5",
+    "oxfmt": "^0.77.0",
     "typescript": "^6.0.3"
   }
 }
