@@ -1,8 +1,8 @@
 # Modelo de dados
 
 - **Status:** Pronto
-- **Versão:** 1.0
-- **Última atualização:** 05-11-2026
+- **Versão:** 2.0
+- **Última atualização:** 06-11-2026
 - **SGBD:** PostgreSQL
 
 Entidades, tabelas, colunas e restrições do banco. O schema Drizzle é a
@@ -211,6 +211,29 @@ O banco garante a estrutura. As regras de comportamento (imutabilidade do
 Realizado, estorno uma só vez, travas do saldo inicial) ficam no domínio, com
 testes.
 
+**Propriedade dos dados:** conta, categoria e parcelamento referenciados por um
+registro pertencem ao mesmo usuário dele. Cada referência é uma chave composta
+com `user_id`, e as tabelas referenciadas têm o único correspondente como alvo.
+
+**accounts**
+
+- Único `(id, user_id)`, alvo das referências.
+
+**categories**
+
+- Único `(user_id, type, name)`.
+- Único `(id, user_id, type)`, alvo das referências.
+- Categoria do sistema é sempre ativa.
+
+**installments**
+
+- Único `(id, user_id)`, alvo das referências.
+- `total_amount` maior que zero e `installment_count` maior ou igual a 1.
+- A conta é do mesmo usuário: `(account_id, user_id)` referencia
+  `accounts (id, user_id)`.
+- A categoria é do mesmo usuário e tem o mesmo tipo:
+  `(category_id, user_id, type)` referencia `categories (id, user_id, type)`.
+
 **transactions**
 
 - `amount` maior que zero; `paid_amount`, quando existe, também.
@@ -220,24 +243,20 @@ testes.
 - `accounting_month` é o dia 01 de um mês e não é posterior a `due_date`.
 - `installment_id` e `installment_number` existem juntos ou nenhum dos dois, e o
   par é único.
-- A categoria tem o mesmo tipo do lançamento: `(category_id, type)` referencia
-  `categories (id, type)`.
-
-**categories**
-
-- Único `(user_id, type, name)`.
-- Único `(id, type)`, alvo da referência acima.
-- Categoria do sistema é sempre ativa.
-
-**installments**
-
-- `total_amount` maior que zero e `installment_count` maior ou igual a 1.
-- `(category_id, type)` referencia `categories (id, type)`.
+- A conta é do mesmo usuário: `(account_id, user_id)` referencia
+  `accounts (id, user_id)`.
+- A categoria é do mesmo usuário e tem o mesmo tipo:
+  `(category_id, user_id, type)` referencia `categories (id, user_id, type)`.
+- O parcelamento, quando existe, é do mesmo usuário:
+  `(installment_id, user_id)` referencia `installments (id, user_id)`.
 
 **transfers**
 
 - `amount` maior que zero.
 - Origem diferente do destino.
+- Origem e destino são do mesmo usuário da transferência:
+  `(from_account_id, user_id)` e `(to_account_id, user_id)` referenciam
+  `accounts (id, user_id)`.
 
 **Em todas:** nenhuma exclusão em cascata.
 
@@ -276,3 +295,7 @@ Em `transfers`:
   inteiro evita uma biblioteca decimal.
 - **Saldos e demais valores calculados não são guardados:** evita divergência
   entre o saldo salvo e os movimentos.
+- **Referências compostas com `user_id`:** o banco garante que um registro nunca
+  aponte para conta, categoria ou parcelamento de outro usuário, em vez de
+  depender só da camada de acesso a dados. Na categoria, a mesma referência
+  garante também o tipo.
