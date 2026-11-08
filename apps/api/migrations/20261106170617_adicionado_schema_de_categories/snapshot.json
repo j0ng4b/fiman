@@ -2,15 +2,10 @@
   "version": "8",
   "dialect": "postgres",
   "id": "800531b3-a941-4e6e-89b0-5385f79c4893",
-  "prevIds": [
-    "634546ff-00f0-4e69-ac1b-64fdf4e68b12"
-  ],
+  "prevIds": ["634546ff-00f0-4e69-ac1b-64fdf4e68b12"],
   "ddl": [
     {
-      "values": [
-        "I",
-        "E"
-      ],
+      "values": ["I", "E"],
       "name": "category_type",
       "entityType": "enums",
       "schema": "public"
@@ -270,14 +265,10 @@
     },
     {
       "nameExplicit": false,
-      "columns": [
-        "user_id"
-      ],
+      "columns": ["user_id"],
       "schemaTo": "public",
       "tableTo": "users",
-      "columnsTo": [
-        "id"
-      ],
+      "columnsTo": ["id"],
       "onUpdate": "NO ACTION",
       "onDelete": "RESTRICT",
       "name": "accounts_user_id_users_id_fkey",
@@ -287,14 +278,10 @@
     },
     {
       "nameExplicit": false,
-      "columns": [
-        "user_id"
-      ],
+      "columns": ["user_id"],
       "schemaTo": "public",
       "tableTo": "users",
-      "columnsTo": [
-        "id"
-      ],
+      "columnsTo": ["id"],
       "onUpdate": "NO ACTION",
       "onDelete": "RESTRICT",
       "name": "categories_user_id_users_id_fkey",
@@ -303,9 +290,7 @@
       "table": "categories"
     },
     {
-      "columns": [
-        "id"
-      ],
+      "columns": ["id"],
       "nameExplicit": false,
       "name": "accounts_pkey",
       "schema": "public",
@@ -313,9 +298,7 @@
       "entityType": "pks"
     },
     {
-      "columns": [
-        "id"
-      ],
+      "columns": ["id"],
       "nameExplicit": false,
       "name": "categories_pkey",
       "schema": "public",
@@ -323,9 +306,7 @@
       "entityType": "pks"
     },
     {
-      "columns": [
-        "id"
-      ],
+      "columns": ["id"],
       "nameExplicit": false,
       "name": "users_pkey",
       "schema": "public",

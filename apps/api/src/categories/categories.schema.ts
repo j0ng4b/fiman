@@ -1,4 +1,4 @@
-import { sql } from "drizzle-orm";
+import { sql } from 'drizzle-orm';
 import {
     boolean,
     check,
@@ -8,13 +8,14 @@ import {
     text,
     timestamp,
     unique,
-} from "drizzle-orm/pg-core";
-import { usersTable } from "../users/users.schema.ts";
+} from 'drizzle-orm/pg-core';
 
-export const entryType = pgEnum("entry_type", ["I", "E"]);
+import { usersTable } from '../users/users.schema.ts';
+
+export const entryType = pgEnum('entry_type', ['I', 'E']);
 
 export const categoriesTable = snakeCase.table(
-    "categories",
+    'categories',
     {
         id: integer().generatedAlwaysAsIdentity().primaryKey(),
         name: text().notNull(),
@@ -22,28 +23,28 @@ export const categoriesTable = snakeCase.table(
         isSystem: boolean().default(false).notNull(),
         active: boolean().default(true).notNull(),
         userId: integer()
-            .references(() => usersTable.id, { onDelete: "restrict" })
+            .references(() => usersTable.id, { onDelete: 'restrict' })
             .notNull(),
-        createdAt: timestamp({ withTimezone: true, mode: "string" })
+        createdAt: timestamp({ withTimezone: true, mode: 'string' })
             .defaultNow()
             .notNull(),
     },
 
     (table) => [
-        unique("categories_id_user_type_uq").on(
+        unique('categories_id_user_type_uq').on(
             table.id,
             table.userId,
             table.type,
         ),
 
-        unique("categories_user_type_name_uq").on(
+        unique('categories_user_type_name_uq').on(
             table.userId,
             table.type,
             table.name,
         ),
 
         check(
-            "categories_system_active_ck",
+            'categories_system_active_ck',
             sql`NOT ${table.isSystem} OR ${table.active}`,
         ),
     ],

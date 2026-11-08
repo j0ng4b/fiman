@@ -2,9 +2,7 @@
   "version": "8",
   "dialect": "postgres",
   "id": "634546ff-00f0-4e69-ac1b-64fdf4e68b12",
-  "prevIds": [
-    "b98da115-bce5-4b18-926a-1953fc617af0"
-  ],
+  "prevIds": ["b98da115-bce5-4b18-926a-1953fc617af0"],
   "ddl": [
     {
       "isRlsEnabled": false,
@@ -155,14 +153,10 @@
     },
     {
       "nameExplicit": false,
-      "columns": [
-        "user_id"
-      ],
+      "columns": ["user_id"],
       "schemaTo": "public",
       "tableTo": "users",
-      "columnsTo": [
-        "id"
-      ],
+      "columnsTo": ["id"],
       "onUpdate": "NO ACTION",
       "onDelete": "RESTRICT",
       "name": "accounts_user_id_users_id_fkey",
@@ -171,9 +165,7 @@
       "table": "accounts"
     },
     {
-      "columns": [
-        "id"
-      ],
+      "columns": ["id"],
       "nameExplicit": false,
       "name": "accounts_pkey",
       "schema": "public",
@@ -181,9 +173,7 @@
       "entityType": "pks"
     },
     {
-      "columns": [
-        "id"
-      ],
+      "columns": ["id"],
       "nameExplicit": false,
       "name": "users_pkey",
       "schema": "public",

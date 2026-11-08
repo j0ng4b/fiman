@@ -2,34 +2,22 @@
   "version": "8",
   "dialect": "postgres",
   "id": "cc5bba7c-6801-4daf-8a78-521f02299fe3",
-  "prevIds": [
-    "997f59fb-5cb8-4d93-a3b3-d71206b5488a"
-  ],
+  "prevIds": ["997f59fb-5cb8-4d93-a3b3-d71206b5488a"],
   "ddl": [
     {
-      "values": [
-        "I",
-        "E"
-      ],
+      "values": ["I", "E"],
       "name": "entry_type",
       "entityType": "enums",
       "schema": "public"
     },
     {
-      "values": [
-        "P",
-        "C",
-        "X"
-      ],
+      "values": ["P", "C", "X"],
       "name": "transaction_status",
       "entityType": "enums",
       "schema": "public"
     },
     {
-      "values": [
-        "I",
-        "E"
-      ],
+      "values": ["I", "E"],
       "name": "transaction_type",
       "entityType": "enums",
       "schema": "public"
@@ -802,14 +790,10 @@
     },
     {
       "nameExplicit": false,
-      "columns": [
-        "user_id"
-      ],
+      "columns": ["user_id"],
       "schemaTo": "public",
       "tableTo": "users",
-      "columnsTo": [
-        "id"
-      ],
+      "columnsTo": ["id"],
       "onUpdate": "NO ACTION",
       "onDelete": "RESTRICT",
       "name": "accounts_user_id_users_id_fkey",
@@ -819,14 +803,10 @@
     },
     {
       "nameExplicit": false,
-      "columns": [
-        "user_id"
-      ],
+      "columns": ["user_id"],
       "schemaTo": "public",
       "tableTo": "users",
-      "columnsTo": [
-        "id"
-      ],
+      "columnsTo": ["id"],
       "onUpdate": "NO ACTION",
       "onDelete": "RESTRICT",
       "name": "categories_user_id_users_id_fkey",
@@ -836,14 +816,10 @@
     },
     {
       "nameExplicit": false,
-      "columns": [
-        "user_id"
-      ],
+      "columns": ["user_id"],
       "schemaTo": "public",
       "tableTo": "users",
-      "columnsTo": [
-        "id"
-      ],
+      "columnsTo": ["id"],
       "onUpdate": "NO ACTION",
       "onDelete": "RESTRICT",
       "name": "installments_user_id_users_id_fkey",
@@ -853,14 +829,10 @@
     },
     {
       "nameExplicit": false,
-      "columns": [
-        "account_id"
-      ],
+      "columns": ["account_id"],
       "schemaTo": "public",
       "tableTo": "accounts",
-      "columnsTo": [
-        "id"
-      ],
+      "columnsTo": ["id"],
       "onUpdate": "NO ACTION",
       "onDelete": "RESTRICT",
       "name": "installments_account_id_accounts_id_fkey",
@@ -870,16 +842,10 @@
     },
     {
       "nameExplicit": true,
-      "columns": [
-        "category_id",
-        "type"
-      ],
+      "columns": ["category_id", "type"],
       "schemaTo": "public",
       "tableTo": "categories",
-      "columnsTo": [
-        "id",
-        "type"
-      ],
+      "columnsTo": ["id", "type"],
       "onUpdate": "NO ACTION",
       "onDelete": "RESTRICT",
       "name": "installments_category_type_fk",
@@ -889,14 +855,10 @@
     },
     {
       "nameExplicit": false,
-      "columns": [
-        "user_id"
-      ],
+      "columns": ["user_id"],
       "schemaTo": "public",
       "tableTo": "users",
-      "columnsTo": [
-        "id"
-      ],
+      "columnsTo": ["id"],
       "onUpdate": "NO ACTION",
       "onDelete": "RESTRICT",
       "name": "transactions_user_id_users_id_fkey",
@@ -906,14 +868,10 @@
     },
     {
       "nameExplicit": false,
-      "columns": [
-        "account_id"
-      ],
+      "columns": ["account_id"],
       "schemaTo": "public",
       "tableTo": "accounts",
-      "columnsTo": [
-        "id"
-      ],
+      "columnsTo": ["id"],
       "onUpdate": "NO ACTION",
       "onDelete": "RESTRICT",
       "name": "transactions_account_id_accounts_id_fkey",
@@ -923,14 +881,10 @@
     },
     {
       "nameExplicit": false,
-      "columns": [
-        "category_id"
-      ],
+      "columns": ["category_id"],
       "schemaTo": "public",
       "tableTo": "categories",
-      "columnsTo": [
-        "id"
-      ],
+      "columnsTo": ["id"],
       "onUpdate": "NO ACTION",
       "onDelete": "RESTRICT",
       "name": "transactions_category_id_categories_id_fkey",
@@ -940,14 +894,10 @@
     },
     {
       "nameExplicit": false,
-      "columns": [
-        "installment_id"
-      ],
+      "columns": ["installment_id"],
       "schemaTo": "public",
       "tableTo": "installments",
-      "columnsTo": [
-        "id"
-      ],
+      "columnsTo": ["id"],
       "onUpdate": "NO ACTION",
       "onDelete": "RESTRICT",
       "name": "transactions_installment_id_installments_id_fkey",
@@ -957,14 +907,10 @@
     },
     {
       "nameExplicit": false,
-      "columns": [
-        "from_account_id"
-      ],
+      "columns": ["from_account_id"],
       "schemaTo": "public",
       "tableTo": "accounts",
-      "columnsTo": [
-        "id"
-      ],
+      "columnsTo": ["id"],
       "onUpdate": "NO ACTION",
       "onDelete": "RESTRICT",
       "name": "transfers_from_account_id_accounts_id_fkey",
@@ -974,14 +920,10 @@
     },
     {
       "nameExplicit": false,
-      "columns": [
-        "to_account_id"
-      ],
+      "columns": ["to_account_id"],
       "schemaTo": "public",
       "tableTo": "accounts",
-      "columnsTo": [
-        "id"
-      ],
+      "columnsTo": ["id"],
       "onUpdate": "NO ACTION",
       "onDelete": "RESTRICT",
       "name": "transfers_to_account_id_accounts_id_fkey",
@@ -991,14 +933,10 @@
     },
     {
       "nameExplicit": false,
-      "columns": [
-        "user_id"
-      ],
+      "columns": ["user_id"],
       "schemaTo": "public",
       "tableTo": "users",
-      "columnsTo": [
-        "id"
-      ],
+      "columnsTo": ["id"],
       "onUpdate": "NO ACTION",
       "onDelete": "RESTRICT",
       "name": "transfers_user_id_users_id_fkey",
@@ -1007,9 +945,7 @@
       "table": "transfers"
     },
     {
-      "columns": [
-        "id"
-      ],
+      "columns": ["id"],
       "nameExplicit": false,
       "name": "accounts_pkey",
       "schema": "public",
@@ -1017,9 +953,7 @@
       "entityType": "pks"
     },
     {
-      "columns": [
-        "id"
-      ],
+      "columns": ["id"],
       "nameExplicit": false,
       "name": "categories_pkey",
       "schema": "public",
@@ -1027,9 +961,7 @@
       "entityType": "pks"
     },
     {
-      "columns": [
-        "id"
-      ],
+      "columns": ["id"],
       "nameExplicit": false,
       "name": "installments_pkey",
       "schema": "public",
@@ -1037,9 +969,7 @@
       "entityType": "pks"
     },
     {
-      "columns": [
-        "id"
-      ],
+      "columns": ["id"],
       "nameExplicit": false,
       "name": "transactions_pkey",
       "schema": "public",
@@ -1047,9 +977,7 @@
       "entityType": "pks"
     },
     {
-      "columns": [
-        "id"
-      ],
+      "columns": ["id"],
       "nameExplicit": false,
       "name": "transfers_pkey",
       "schema": "public",
@@ -1057,9 +985,7 @@
       "entityType": "pks"
     },
     {
-      "columns": [
-        "id"
-      ],
+      "columns": ["id"],
       "nameExplicit": false,
       "name": "users_pkey",
       "schema": "public",
@@ -1068,10 +994,7 @@
     },
     {
       "nameExplicit": true,
-      "columns": [
-        "id",
-        "type"
-      ],
+      "columns": ["id", "type"],
       "nullsNotDistinct": false,
       "name": "categories_id_type_uq",
       "entityType": "uniques",
@@ -1080,11 +1003,7 @@
     },
     {
       "nameExplicit": true,
-      "columns": [
-        "user_id",
-        "type",
-        "name"
-      ],
+      "columns": ["user_id", "type", "name"],
       "nullsNotDistinct": false,
       "name": "categories_user_type_name_uq",
       "entityType": "uniques",
@@ -1113,7 +1032,5 @@
       "table": "installments"
     }
   ],
-  "renames": [
-    "public.category_type->public.entry_type"
-  ]
+  "renames": ["public.category_type->public.entry_type"]
 }

@@ -2,15 +2,10 @@
   "version": "8",
   "dialect": "postgres",
   "id": "42e7a3bc-90e5-4b4b-b363-16d85c055d17",
-  "prevIds": [
-    "800531b3-a941-4e6e-89b0-5385f79c4893"
-  ],
+  "prevIds": ["800531b3-a941-4e6e-89b0-5385f79c4893"],
   "ddl": [
     {
-      "values": [
-        "I",
-        "E"
-      ],
+      "values": ["I", "E"],
       "name": "category_type",
       "entityType": "enums",
       "schema": "public"
@@ -389,14 +384,10 @@
     },
     {
       "nameExplicit": false,
-      "columns": [
-        "user_id"
-      ],
+      "columns": ["user_id"],
       "schemaTo": "public",
       "tableTo": "users",
-      "columnsTo": [
-        "id"
-      ],
+      "columnsTo": ["id"],
       "onUpdate": "NO ACTION",
       "onDelete": "RESTRICT",
       "name": "accounts_user_id_users_id_fkey",
@@ -406,14 +397,10 @@
     },
     {
       "nameExplicit": false,
-      "columns": [
-        "user_id"
-      ],
+      "columns": ["user_id"],
       "schemaTo": "public",
       "tableTo": "users",
-      "columnsTo": [
-        "id"
-      ],
+      "columnsTo": ["id"],
       "onUpdate": "NO ACTION",
       "onDelete": "RESTRICT",
       "name": "categories_user_id_users_id_fkey",
@@ -423,14 +410,10 @@
     },
     {
       "nameExplicit": false,
-      "columns": [
-        "from_account_id"
-      ],
+      "columns": ["from_account_id"],
       "schemaTo": "public",
       "tableTo": "accounts",
-      "columnsTo": [
-        "id"
-      ],
+      "columnsTo": ["id"],
       "onUpdate": "NO ACTION",
       "onDelete": "RESTRICT",
       "name": "transfers_from_account_id_accounts_id_fkey",
@@ -440,14 +423,10 @@
     },
     {
       "nameExplicit": false,
-      "columns": [
-        "to_account_id"
-      ],
+      "columns": ["to_account_id"],
       "schemaTo": "public",
       "tableTo": "accounts",
-      "columnsTo": [
-        "id"
-      ],
+      "columnsTo": ["id"],
       "onUpdate": "NO ACTION",
       "onDelete": "RESTRICT",
       "name": "transfers_to_account_id_accounts_id_fkey",
@@ -457,14 +436,10 @@
     },
     {
       "nameExplicit": false,
-      "columns": [
-        "user_id"
-      ],
+      "columns": ["user_id"],
       "schemaTo": "public",
       "tableTo": "users",
-      "columnsTo": [
-        "id"
-      ],
+      "columnsTo": ["id"],
       "onUpdate": "NO ACTION",
       "onDelete": "RESTRICT",
       "name": "transfers_user_id_users_id_fkey",
@@ -473,9 +448,7 @@
       "table": "transfers"
     },
     {
-      "columns": [
-        "id"
-      ],
+      "columns": ["id"],
       "nameExplicit": false,
       "name": "accounts_pkey",
       "schema": "public",
@@ -483,9 +456,7 @@
       "entityType": "pks"
     },
     {
-      "columns": [
-        "id"
-      ],
+      "columns": ["id"],
       "nameExplicit": false,
       "name": "categories_pkey",
       "schema": "public",
@@ -493,9 +464,7 @@
       "entityType": "pks"
     },
     {
-      "columns": [
-        "id"
-      ],
+      "columns": ["id"],
       "nameExplicit": false,
       "name": "transfers_pkey",
       "schema": "public",
@@ -503,9 +472,7 @@
       "entityType": "pks"
     },
     {
-      "columns": [
-        "id"
-      ],
+      "columns": ["id"],
       "nameExplicit": false,
       "name": "users_pkey",
       "schema": "public",
