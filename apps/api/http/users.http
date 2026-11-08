@@ -1,0 +1,48 @@
+### Get all users
+GET /users
+Host: {{host}}
+Accept: application/json
+
+
+### Get user by id (valid)
+GET /users/1
+Host: {{host}}
+Accept: application/json
+
+
+### Get user by id (invalid)
+GET /users/99
+Host: {{host}}
+Accept: application/json
+
+
+### Create a new user
+POST /users
+Host: {{host}}
+Accept: application/json
+Content-Type: application/json
+
+{
+    "name": "New User",
+}
+
+### Update user name (valid)
+PATCH /users/1
+Host: {{host}}
+Accept: application/json
+Content-Type: application/json
+
+{
+    "name": "Jonatha Gabriel"
+}
+
+### Update user name (invalid)
+PATCH /users/99
+Host: {{host}}
+Accept: application/json
+Content-Type: application/json
+
+{
+    "name": "Jonatha"
+}
+
