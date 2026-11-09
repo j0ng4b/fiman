@@ -1,3 +1,4 @@
+import type { InferInsertModel, InferSelectModel } from 'drizzle-orm';
 import {
     snakeCase,
     integer,
@@ -27,3 +28,6 @@ export const accountsTable = snakeCase.table(
     },
     (table) => [unique('accounts_id_user_uq').on(table.id, table.userId)],
 );
+
+export type Account = InferSelectModel<typeof accountsTable>;
+export type NewAccount = InferInsertModel<typeof accountsTable>;
