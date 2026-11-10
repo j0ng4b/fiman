@@ -5,8 +5,7 @@ import { drizzle } from 'drizzle-orm/node-postgres';
 
 import { DATABASE } from './database.constants.ts';
 import { DatabaseConnectionError } from './database.exceptions.ts';
-
-export type Database = ReturnType<typeof drizzle>;
+import type { Database } from './database.types.ts';
 
 export const DatabaseProvider = {
     provide: DATABASE,
