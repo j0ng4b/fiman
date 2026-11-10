@@ -1,8 +1,8 @@
 # Regras de negócio
 
 - **Status:** Pronto
-- **Versão:** 1.0
-- **Última atualização:** 05-11-2026
+- **Versão:** 1.1
+- **Última atualização:** 10-11-2026
 
 As regras que o sistema sempre cumpre: o que é válido, como se calcula e o que é
 proibido. Os termos estão no [glossário](glossario.md); o que o sistema faz, em
@@ -45,7 +45,7 @@ estrutura (ver [modelo-de-dados](modelo-de-dados.md)).
 | :----: | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :-------: |
 | RN-004 | Cada conta tem saldo inicial (pode ser zero ou negativo) e data de início (padrão: hoje; não pode ser futura).                                                                                           | Validação |
 | RN-005 | Lançamentos e transferências da conta não podem ter data anterior à data de início, nem mês de competência anterior ao mês da data de início, pois o saldo inicial já contém tudo o que aconteceu antes. | Validação |
-| RN-006 | O saldo inicial e a data de início só podem ser alterados enquanto a conta não tiver nenhum lançamento Realizado nem transferência.                                                                      | Restrição |
+| RN-006 | O saldo inicial e a data de início só podem ser alterados enquanto a conta não tiver nenhum lançamento nem transferência.                                                                                | Restrição |
 
 ## Categorias
 
