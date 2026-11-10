@@ -1,11 +1,18 @@
 import { Inject, Injectable } from '@nestjs/common';
-import { and, eq } from 'drizzle-orm';
+import { and, eq, or } from 'drizzle-orm';
 
 import { DATABASE } from '../database/database.constants.ts';
-import type { Database } from '../database/database.types.ts';
+import type {
+    Database,
+    DbExecutor,
+    Transaction,
+} from '../database/database.types.ts';
 import { isForeignKeyViolation } from '../database/database.utils.ts';
+import { transactionsTable } from '../transactions/transactions.schema.ts';
+import { transfersTable } from '../transfers/transfers.schema.ts';
 import type { CreateAccountDto, UpdateAccountDto } from './accounts.dto.ts';
 import {
+    AccountHasMovementsError,
     AccountInUseError,
     AccountNotFoundError,
 } from './accounts.exceptions.ts';
@@ -91,31 +98,41 @@ export class AccountsService {
      * @returns The updated account.
      *
      * @throws AccountNotFoundError If the account does not exists.
+     * @throws AccountHasMovementsError If the account already has movements.
      */
     async update(
         userId: number,
         accountId: number,
         data: UpdateAccountDto,
     ): Promise<Account> {
-        // TODO: Check if there are posting to the account (RN-005) thats block
-        // update initialBalance and startDate.
-
-        const [account] = await this.db
-            .update(accountsTable)
-            .set(data)
-            .where(
-                and(
-                    eq(accountsTable.id, accountId),
-                    eq(accountsTable.userId, userId),
-                ),
-            )
-            .returning();
-
-        if (!account) {
-            throw new AccountNotFoundError(accountId);
+        if (data.startDate == undefined && data.initialBalance == undefined) {
+            return await this.applyUpdate(this.db, userId, accountId, data);
         }
 
-        return account;
+        return await this.db.transaction(async (tx: Transaction) => {
+            const [locked] = await tx
+                .select({ id: accountsTable.id })
+                .from(accountsTable)
+                .where(
+                    and(
+                        eq(accountsTable.id, accountId),
+                        eq(accountsTable.userId, userId),
+                    ),
+                )
+                .for('update');
+
+            if (!locked) {
+                throw new AccountNotFoundError(accountId);
+            }
+
+            // Accounts with movements can't change their startDate and
+            // initialBalance (RN-006).
+            if (await this.hasMovements(tx, accountId)) {
+                throw new AccountHasMovementsError(accountId);
+            }
+
+            return await this.applyUpdate(tx, userId, accountId, data);
+        });
     }
 
     /**
@@ -190,5 +207,82 @@ export class AccountsService {
         }
 
         return account;
+    }
+
+    /**
+     * Effectively update the account data.
+     *
+     * @private
+     *
+     * @param executor Database or transaction executor.
+     * @param userId User owner of the account.
+     * @param accountId Account identifier.
+     * @param data The data of the account to update.
+     *
+     * @returns The updated account.
+     *
+     * @throws AccountNotFoundError If the account does not exists.
+     */
+    private async applyUpdate(
+        executor: DbExecutor,
+        userId: number,
+        accountId: number,
+        data: UpdateAccountDto,
+    ): Promise<Account> {
+        const [account] = await executor
+            .update(accountsTable)
+            .set(data)
+            .where(
+                and(
+                    eq(accountsTable.id, accountId),
+                    eq(accountsTable.userId, userId),
+                ),
+            )
+            .returning();
+
+        if (!account) {
+            throw new AccountNotFoundError(accountId);
+        }
+
+        return account;
+    }
+
+    /**
+     * Whether the account has any movement: a transaction or a transfer, as
+     * source or destination.
+     *
+     * @private
+     *
+     * @param executor Database or transaction executor.
+     * @param accountId Account identifier.
+     *
+     * @throws AccountNotFoundError If the account does not exists.
+     */
+    private async hasMovements(
+        executor: DbExecutor,
+        accountId: number,
+    ): Promise<boolean> {
+        const [transaction] = await executor
+            .select({ id: transactionsTable.id })
+            .from(transactionsTable)
+            .where(eq(transactionsTable.accountId, accountId))
+            .limit(1);
+
+        if (transaction) {
+            return true;
+        }
+
+        const [transfer] = await executor
+            .select({ id: transfersTable.id })
+            .from(transfersTable)
+            .where(
+                or(
+                    eq(transfersTable.fromAccountId, accountId),
+                    eq(transfersTable.toAccountId, accountId),
+                ),
+            )
+            .limit(1);
+
+        return transfer !== undefined;
     }
 }

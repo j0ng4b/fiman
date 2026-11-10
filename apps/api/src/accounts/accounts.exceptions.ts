@@ -11,3 +11,10 @@ export class AccountInUseError extends Error {
         this.name = AccountInUseError.name;
     }
 }
+
+export class AccountHasMovementsError extends Error {
+    constructor(id: number) {
+        super(`Account with ID ${id} already has movements`);
+        this.name = AccountInUseError.name;
+    }
+}
