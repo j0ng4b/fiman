@@ -3,8 +3,12 @@ import { and, eq } from 'drizzle-orm';
 
 import { DATABASE } from '../database/database.constants.ts';
 import type { Database } from '../database/database.types.ts';
+import { isForeignKeyViolation } from '../database/database.utils.ts';
 import type { CreateAccountDto, UpdateAccountDto } from './accounts.dto.ts';
-import { AccountNotFoundError } from './accounts.exceptions.ts';
+import {
+    AccountInUseError,
+    AccountNotFoundError,
+} from './accounts.exceptions.ts';
 import type { Account } from './accounts.schema.ts';
 import { accountsTable } from './accounts.schema.ts';
 
@@ -117,7 +121,8 @@ export class AccountsService {
     /**
      * Delete an account.
      *
-     * This action can't be reverted.
+     * This action can't be reverted. Accounts with installments and no
+     * transaction associated can't be deleted as well.
      *
      * @param userId User owner of the account.
      * @param accountId Account identifier.
@@ -125,6 +130,8 @@ export class AccountsService {
      * @returns The deleted account.
      *
      * @throws AccountNotFoundError If the account does not exists.
+     * @throws AccountInUseError If there are movements associated to the
+     *   account.
      *
      * @see disable
      */
@@ -146,6 +153,11 @@ export class AccountsService {
 
             return account;
         } catch (error) {
+            // Accounts with movements can't be deleted (RN-002).
+            if (isForeignKeyViolation(error)) {
+                throw new AccountInUseError(accountId);
+            }
+
             throw error;
         }
     }
