@@ -1,6 +1,7 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { and, eq, or } from 'drizzle-orm';
 
+import { todayISO } from '../common/dates.ts';
 import { DATABASE } from '../database/database.constants.ts';
 import type {
     Database,
@@ -15,6 +16,7 @@ import {
     AccountHasMovementsError,
     AccountInUseError,
     AccountNotFoundError,
+    InvalidAccountStartDateError,
 } from './accounts.exceptions.ts';
 import type { Account } from './accounts.schema.ts';
 import { accountsTable } from './accounts.schema.ts';
@@ -72,9 +74,12 @@ export class AccountsService {
      * @param data Data used to create the account.
      *
      * @returns The new created account.
+     *
+     * @throws InvalidAccountStartDateError If the date is in the future.
      */
     async create(userId: number, data: CreateAccountDto): Promise<Account> {
-        // TODO: Check if initial date is less than today (RN-004).
+        // Start date can't be in future (RN-004).
+        this.assertStartDateNotInFuture(data.startDate);
 
         const [account] = await this.db
             .insert(accountsTable)
@@ -99,12 +104,18 @@ export class AccountsService {
      *
      * @throws AccountNotFoundError If the account does not exist.
      * @throws AccountHasMovementsError If the account already has movements.
+     * @throws InvalidAccountStartDateError If the date is in the future.
      */
     async update(
         userId: number,
         accountId: number,
         data: UpdateAccountDto,
     ): Promise<Account> {
+        if (data.startDate !== undefined) {
+            // Start date can't be in future (RN-004).
+            this.assertStartDateNotInFuture(data.startDate);
+        }
+
         if (data.startDate === undefined && data.initialBalance === undefined) {
             return await this.applyUpdate(this.db, userId, accountId, data);
         }
@@ -284,5 +295,18 @@ export class AccountsService {
             .limit(1);
 
         return transfer !== undefined;
+    }
+
+    /**
+     * Assert whether the start date is in the future.
+     *
+     * @param startDate Date to check.
+     *
+     * @throws InvalidAccountStartDateError If the date is in the future.
+     */
+    private assertStartDateNotInFuture(startDate: string): void {
+        if (startDate > todayISO()) {
+            throw new InvalidAccountStartDateError(startDate);
+        }
     }
 }
