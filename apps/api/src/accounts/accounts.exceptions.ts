@@ -15,7 +15,7 @@ export class AccountInUseError extends Error {
 export class AccountHasMovementsError extends Error {
     constructor(readonly id: number) {
         super(`Account with ID ${id} already has movements`);
-        this.name = AccountInUseError.name;
+        this.name = AccountHasMovementsError.name;
     }
 }
 
