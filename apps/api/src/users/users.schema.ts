@@ -1,4 +1,4 @@
-import { InferInsertModel, InferSelectModel } from 'drizzle-orm';
+import type { InferInsertModel, InferSelectModel } from 'drizzle-orm';
 import { integer, snakeCase, text, timestamp } from 'drizzle-orm/pg-core';
 
 export const usersTable = snakeCase.table('users', {
