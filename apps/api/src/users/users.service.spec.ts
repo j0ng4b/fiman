@@ -1,11 +1,11 @@
 import { eq } from 'drizzle-orm';
-import { Pool } from 'pg';
+import type { Pool } from 'pg';
 import { inject } from 'vitest';
 
 import { createTestDatabase, resetDatabase } from '../../tests/database.ts';
 import { createUser } from '../../tests/factories.ts';
 import { categoriesTable } from '../categories/categories.schema.ts';
-import { Database } from '../database/database.types.ts';
+import type { Database } from '../database/database.types.ts';
 import { UserNotFoundError } from './users.exceptions.ts';
 import { usersTable } from './users.schema.ts';
 import { UsersService } from './users.service.ts';

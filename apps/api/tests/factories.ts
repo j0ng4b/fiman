@@ -1,4 +1,4 @@
-import { Database } from '../src/database/database.types.ts';
+import type { Database } from '../src/database/database.types.ts';
 import { usersTable } from '../src/users/users.schema.ts';
 
 function first<T>(rows: T[]): T {
