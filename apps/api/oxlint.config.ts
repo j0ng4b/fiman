@@ -15,6 +15,13 @@ export default defineConfig({
     rules: {
         'typescript/no-explicit-any': 'off',
         'typescript/no-floating-promises': 'error',
+        'typescript/consistent-type-imports': [
+            'error',
+            {
+                prefer: 'type-imports',
+                fixStyle: 'separate-type-imports',
+            },
+        ],
     },
 
     env: {
