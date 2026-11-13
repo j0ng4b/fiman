@@ -8,12 +8,9 @@ import {
     Post,
 } from '@nestjs/common';
 
+import { idSchema } from '../common/dto.ts';
 import type { CreateUserDto, UpdateUserDto } from './users.dto.ts';
-import {
-    createUserSchema,
-    updateUserSchema,
-    userIdSchema,
-} from './users.dto.ts';
+import { createUserSchema, updateUserSchema } from './users.dto.ts';
 import { UserNotFoundError } from './users.exceptions.ts';
 import { UsersService } from './users.service.ts';
 
@@ -22,7 +19,7 @@ export class UsersController {
     constructor(private readonly usersService: UsersService) {}
 
     @Get(':id')
-    async findById(@Param('id', { schema: userIdSchema }) id: number) {
+    async findById(@Param('id', { schema: idSchema }) id: number) {
         try {
             return await this.usersService.findById(id);
         } catch (error) {
@@ -46,7 +43,7 @@ export class UsersController {
 
     @Patch(':id')
     async update(
-        @Param('id', { schema: userIdSchema }) id: number,
+        @Param('id', { schema: idSchema }) id: number,
         @Body({ schema: updateUserSchema }) body: UpdateUserDto,
     ) {
         try {
