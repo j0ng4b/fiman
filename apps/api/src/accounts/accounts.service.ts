@@ -78,12 +78,13 @@ export class AccountsService {
      * @throws InvalidAccountStartDateError If the date is in the future.
      */
     async create(userId: number, data: CreateAccountDto): Promise<Account> {
-        // Start date can't be in future (RN-004).
-        this.assertStartDateNotInFuture(data.startDate);
+        // RN-004: the start date defaults to today and can't be in future.
+        const startDate = data.startDate ?? todayISO();
+        this.assertStartDateNotInFuture(startDate);
 
         const [account] = await this.db
             .insert(accountsTable)
-            .values({ userId, ...data })
+            .values({ userId, ...data, startDate })
             .returning();
 
         if (!account) {

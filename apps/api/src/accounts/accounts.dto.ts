@@ -2,7 +2,7 @@ import { z } from 'zod';
 
 export const createAccountSchema = z.object({
     name: z.string().trim().min(1).max(100),
-    startDate: z.iso.date(),
+    startDate: z.iso.date().optional(),
     initialBalance: z.int32(),
 });
 export type CreateAccountDto = z.infer<typeof createAccountSchema>;
