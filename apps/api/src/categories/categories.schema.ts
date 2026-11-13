@@ -1,3 +1,4 @@
+import type { InferInsertModel, InferSelectModel } from 'drizzle-orm';
 import { sql } from 'drizzle-orm';
 import {
     boolean,
@@ -49,3 +50,6 @@ export const categoriesTable = snakeCase.table(
         ),
     ],
 );
+
+export type Category = InferSelectModel<typeof categoriesTable>;
+export type NewCategory = InferInsertModel<typeof categoriesTable>;
