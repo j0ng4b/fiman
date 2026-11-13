@@ -8,6 +8,7 @@ import {
     Param,
     Patch,
     Post,
+    UseFilters,
 } from '@nestjs/common';
 
 import { userIdSchema } from '../users/users.dto.ts';
@@ -22,10 +23,12 @@ import {
     setActiveSchema,
     updateAccountSchema,
 } from './accounts.dto.ts';
+import { AccountsExeceptionFilter } from './accounts.filter.ts';
 import { Account } from './accounts.schema.ts';
 import { AccountsService } from './accounts.service.ts';
 
 @Controller('/users/:userId/accounts')
+@UseFilters(AccountsExeceptionFilter)
 export class AccountsController {
     constructor(private readonly accountsService: AccountsService) {}
 
