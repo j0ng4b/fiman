@@ -13,6 +13,3 @@ export const updateAccountSchema = createAccountSchema
         error: 'At least one field should be provided!',
     });
 export type UpdateAccountDto = z.infer<typeof updateAccountSchema>;
-
-export const setActiveSchema = z.object({ active: z.boolean() });
-export type SetActiveDto = z.infer<typeof setActiveSchema>;
