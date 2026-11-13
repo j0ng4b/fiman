@@ -22,12 +22,12 @@ import {
     setActiveSchema,
     updateAccountSchema,
 } from './accounts.dto.ts';
-import { AccountsExeceptionFilter } from './accounts.filter.ts';
+import { AccountsExceptionFilter } from './accounts.filter.ts';
 import { Account } from './accounts.schema.ts';
 import { AccountsService } from './accounts.service.ts';
 
 @Controller('/users/:userId/accounts')
-@UseFilters(AccountsExeceptionFilter)
+@UseFilters(AccountsExceptionFilter)
 export class AccountsController {
     constructor(private readonly accountsService: AccountsService) {}
 

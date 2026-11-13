@@ -47,7 +47,7 @@ function toHttpException(error: AccountsError): HttpException {
     AccountHasMovementsError,
     InvalidAccountStartDateError,
 )
-export class AccountsExeceptionFilter extends BaseExceptionFilter {
+export class AccountsExceptionFilter extends BaseExceptionFilter {
     catch(exception: AccountsError, host: ArgumentsHost): void {
         super.catch(toHttpException(exception), host);
     }
