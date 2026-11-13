@@ -11,14 +11,13 @@ import {
     UseFilters,
 } from '@nestjs/common';
 
-import { userIdSchema } from '../users/users.dto.ts';
+import { idSchema } from '../common/dto.ts';
 import type {
     CreateAccountDto,
     SetActiveDto,
     UpdateAccountDto,
 } from './accounts.dto.ts';
 import {
-    accountIdSchema,
     createAccountSchema,
     setActiveSchema,
     updateAccountSchema,
@@ -34,22 +33,22 @@ export class AccountsController {
 
     @Get(':id')
     async findById(
-        @Param('userId', { schema: userIdSchema }) userId: number,
-        @Param('id', { schema: accountIdSchema }) id: number,
+        @Param('userId', { schema: idSchema }) userId: number,
+        @Param('id', { schema: idSchema }) id: number,
     ): Promise<Account> {
         return await this.accountsService.findById(userId, id);
     }
 
     @Get()
     async findAll(
-        @Param('userId', { schema: userIdSchema }) userId: number,
+        @Param('userId', { schema: idSchema }) userId: number,
     ): Promise<Account[]> {
         return await this.accountsService.findAll(userId);
     }
 
     @Post()
     async create(
-        @Param('userId', { schema: userIdSchema }) userId: number,
+        @Param('userId', { schema: idSchema }) userId: number,
         @Body({ schema: createAccountSchema }) data: CreateAccountDto,
     ): Promise<Account> {
         return await this.accountsService.create(userId, data);
@@ -57,8 +56,8 @@ export class AccountsController {
 
     @Patch(':id')
     async update(
-        @Param('userId', { schema: userIdSchema }) userId: number,
-        @Param('id', { schema: accountIdSchema }) id: number,
+        @Param('userId', { schema: idSchema }) userId: number,
+        @Param('id', { schema: idSchema }) id: number,
         @Body({ schema: updateAccountSchema }) data: UpdateAccountDto,
     ): Promise<Account> {
         return await this.accountsService.update(userId, id, data);
@@ -67,16 +66,16 @@ export class AccountsController {
     @Delete(':id')
     @HttpCode(HttpStatus.NO_CONTENT)
     async delete(
-        @Param('userId', { schema: userIdSchema }) userId: number,
-        @Param('id', { schema: accountIdSchema }) id: number,
+        @Param('userId', { schema: idSchema }) userId: number,
+        @Param('id', { schema: idSchema }) id: number,
     ): Promise<void> {
         await this.accountsService.delete(userId, id);
     }
 
     @Patch(':id/active')
     async setActive(
-        @Param('userId', { schema: userIdSchema }) userId: number,
-        @Param('id', { schema: accountIdSchema }) id: number,
+        @Param('userId', { schema: idSchema }) userId: number,
+        @Param('id', { schema: idSchema }) id: number,
         @Body({ schema: setActiveSchema }) data: SetActiveDto,
     ): Promise<Account> {
         return await this.accountsService.disable(userId, id, !data.active);
