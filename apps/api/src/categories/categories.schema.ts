@@ -10,9 +10,10 @@ import {
     unique,
 } from 'drizzle-orm/pg-core';
 
+import { ENTRY_TYPES } from '../common/dto.ts';
 import { usersTable } from '../users/users.schema.ts';
 
-export const entryType = pgEnum('entry_type', ['I', 'E']);
+export const entryType = pgEnum('entry_type', ENTRY_TYPES);
 
 export const categoriesTable = snakeCase.table(
     'categories',
