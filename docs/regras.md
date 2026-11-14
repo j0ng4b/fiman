@@ -1,8 +1,8 @@
 # Regras de negócio
 
 - **Status:** Pronto
-- **Versão:** 1.1
-- **Última atualização:** 10-11-2026
+- **Versão:** 1.2
+- **Última atualização:** 14-11-2026
 
 As regras que o sistema sempre cumpre: o que é válido, como se calcula e o que é
 proibido. Os termos estão no [glossário](glossario.md); o que o sistema faz, em
@@ -58,22 +58,22 @@ estrutura (ver [modelo-de-dados](modelo-de-dados.md)).
 
 ## Lançamentos
 
-|   ID   | Regra                                                                                                                                                                                                                                                     |   Tipo    |
-| :----: | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :-------: |
-| RN-011 | O tipo do lançamento define o sinal na soma: receitas somam e despesas subtraem.                                                                                                                                                                          |  Cálculo  |
-| RN-012 | Um lançamento é criado Previsto ou Realizado. O Previsto tem valor previsto e data prevista. O Realizado tem também valor realizado e data realizada, que não pode ser posterior a hoje.                                                                  | Restrição |
-| RN-013 | Confirmar um Previsto acrescenta a data realizada e o valor realizado, sem alterar o valor previsto, a data prevista, a conta nem o mês de competência.                                                                                                   | Restrição |
-| RN-014 | Um lançamento criado já Realizado tem valor previsto igual ao valor realizado e data prevista igual à data realizada.                                                                                                                                     |  Cálculo  |
-| RN-015 | O mês de competência tem como padrão o mês da data prevista e não pode ser posterior a esse mês. Se for anterior, o lançamento conta naquele mês nas visões mensal e anual, mesmo vencendo depois. Vale para receitas e despesas.                         | Validação |
-| RN-016 | Enquanto Previsto, ao editar a data prevista: se o mês de competência é o mês da data prevista, ele passa a ser o mês da nova data; caso contrário, é mantido, e a edição é rejeitada se ele ficar posterior ao mês da nova data prevista.                | Restrição |
-| RN-017 | Lançamentos Previstos podem ser editados até a confirmação.                                                                                                                                                                                               | Restrição |
-| RN-018 | Um lançamento Realizado é imutável nos campos financeiros (tipo, conta, valor previsto, data prevista, valor realizado, data realizada e mês de competência). Somente descrição e categoria podem ser alteradas, pois não afetam saldos.                  | Restrição |
-| RN-019 | Só lançamentos Previstos podem ser cancelados. O estado passa a Cancelado e o registro é mantido. Lançamentos Realizados não podem ser cancelados.                                                                                                        | Restrição |
-| RN-020 | Um lançamento Cancelado não entra em saldos, projeções nem métricas e não pode ser alterado.                                                                                                                                                              | Restrição |
-| RN-021 | Um Realizado só é corrigido por estorno: recebe a data do estorno (igual ou posterior à data realizada) e, a partir dela, o seu efeito é anulado. É a única alteração permitida além de descrição e categoria, só ocorre uma vez e não pode ser desfeita. | Restrição |
-| RN-022 | Um lançamento Previsto é Vencido quando a sua data prevista é anterior a hoje.                                                                                                                                                                            |  Cálculo  |
-| RN-023 | **Variação de data** = data realizada - data prevista, em dias. Maior que 0: atrasado; menor que 0: adiantado; igual a 0: em dia.                                                                                                                         |  Cálculo  |
-| RN-024 | **Variação de valor**, a favor do usuário: despesa = valor previsto - valor realizado; receita = valor realizado - valor previsto. Positiva é favorável. O **percentual** é a variação de valor ÷ valor previsto × 100.                                   |  Cálculo  |
+|   ID   | Regra                                                                                                                                                                                                                                                                                                                |   Tipo    |
+| :----: | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :-------: |
+| RN-011 | O tipo do lançamento define o sinal na soma: receitas somam e despesas subtraem.                                                                                                                                                                                                                                     |  Cálculo  |
+| RN-012 | Um lançamento pode ser criado como Previsto ou diretamente como Realizado. O Previsto possui valor previsto e data prevista. O Realizado possui também valor realizado e data realizada, que não pode ser posterior a hoje.                                                                                          | Restrição |
+| RN-013 | Confirmar um Previsto acrescenta a data realizada e o valor realizado, sem alterar o valor previsto, a data prevista, a conta nem o mês de competência.                                                                                                                                                              | Restrição |
+| RN-014 | Um lançamento criado diretamente como Realizado tem valor previsto igual ao valor realizado e data prevista igual à data realizada.                                                                                                                                                                                  |  Cálculo  |
+| RN-015 | Todo lançamento possui um mês de competência. Quando não informado, recebe como padrão o mês da data prevista. O mês de competência não pode ser posterior ao mês da data prevista. Se for anterior, o lançamento conta naquele mês nas visões mensal e anual, mesmo vencendo depois. Vale para receitas e despesas. | Validação |
+| RN-016 | Enquanto Previsto, ao editar a data prevista: se o mês de competência é o mês da data prevista, ele passa a ser o mês da nova data; caso contrário, é mantido, e a edição é rejeitada se ele ficar posterior ao mês da nova data prevista.                                                                           | Restrição |
+| RN-017 | Lançamentos Previstos podem ser editados até a confirmação.                                                                                                                                                                                                                                                          | Restrição |
+| RN-018 | Um lançamento Realizado é imutável nos campos financeiros (tipo, conta, valor previsto, data prevista, valor realizado, data realizada e mês de competência). Somente descrição e categoria podem ser alteradas, pois não afetam saldos.                                                                             | Restrição |
+| RN-019 | Só lançamentos Previstos podem ser cancelados. O estado passa a Cancelado e o registro é mantido. Lançamentos Realizados não podem ser cancelados.                                                                                                                                                                   | Restrição |
+| RN-020 | Um lançamento Cancelado não entra em saldos, projeções nem métricas e não pode ser alterado.                                                                                                                                                                                                                         | Restrição |
+| RN-021 | Um Realizado só é corrigido por estorno: recebe a data do estorno (igual ou posterior à data realizada) e, a partir dela, o seu efeito é anulado. É a única alteração permitida além de descrição e categoria, só ocorre uma vez e não pode ser desfeita.                                                            | Restrição |
+| RN-022 | Um lançamento Previsto é Vencido quando a sua data prevista é anterior a hoje.                                                                                                                                                                                                                                       |  Cálculo  |
+| RN-023 | **Variação de data** = data realizada - data prevista, em dias. Maior que 0: atrasado; menor que 0: adiantado; igual a 0: em dia.                                                                                                                                                                                    |  Cálculo  |
+| RN-024 | **Variação de valor**, a favor do usuário: despesa = valor previsto - valor realizado; receita = valor realizado - valor previsto. Positiva é favorável. O **percentual** é a variação de valor ÷ valor previsto × 100.                                                                                              |  Cálculo  |
 
 **Exemplo (variação).** Conta de luz prevista em 120,00 para 10/10, paga com
 118,50 em 08/10: adiantada em 2 dias, variação de valor de 1,50 a favor do
@@ -98,11 +98,13 @@ parcela em 31/01, as datas são 31/01, 28/02 e 31/03.
 
 ## Transferências
 
-|   ID   | Regra                                                                                                           |   Tipo    |
-| :----: | --------------------------------------------------------------------------------------------------------------- | :-------: |
-| RN-030 | Uma transferência exige conta de origem diferente da de destino e uma data. Altera o saldo das duas contas.     | Validação |
-| RN-031 | Uma transferência errada é corrigida com uma transferência inversa.                                             | Restrição |
-| RN-032 | A conta de saída deve ter saldo superior ou igual ao valor da transferência para que a operação seja concluída. | Validação |
+|                   ID                   | Regra                                                                                                           |   Tipo    |
+| :------------------------------------: | --------------------------------------------------------------------------------------------------------------- | :-------: |
+|                 RN-030                 | Uma transferência exige conta de origem diferente da de destino e uma data. Altera o saldo das duas contas.     | Validação |
+|                 RN-031                 | Uma transferência errada é corrigida com uma transferência inversa.                                             | Restrição |
+|                 RN-032                 | A conta de saída deve ter saldo superior ou igual ao valor da transferência para que a operação seja concluída. | Validação |
+|                 RN-041                 | Após criada, uma transferência é imutável nos campos financeiros.                                               |
+| Somente a descrição pode ser alterada. | Restrição                                                                                                       |
 
 ## Visões e saldos
 
