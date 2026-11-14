@@ -9,7 +9,7 @@ import {
     UseFilters,
 } from '@nestjs/common';
 
-import { idSchema } from '../common/dto.ts';
+import { idParamSchema } from '../common/dto.ts';
 
 import type { CreateUserDto, UpdateUserDto } from './users.dto.ts';
 import { createUserSchema, updateUserSchema } from './users.dto.ts';
@@ -23,7 +23,7 @@ export class UsersController {
     constructor(private readonly usersService: UsersService) {}
 
     @Get(':id')
-    async findById(@Param('id', { schema: idSchema }) id: number) {
+    async findById(@Param('id', { schema: idParamSchema }) id: number) {
         try {
             return await this.usersService.findById(id);
         } catch (error) {
@@ -47,7 +47,7 @@ export class UsersController {
 
     @Patch(':id')
     async update(
-        @Param('id', { schema: idSchema }) id: number,
+        @Param('id', { schema: idParamSchema }) id: number,
         @Body({ schema: updateUserSchema }) body: UpdateUserDto,
     ) {
         try {
