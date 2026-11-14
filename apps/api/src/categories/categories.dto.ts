@@ -8,7 +8,10 @@ export const createCategorySchema = z.object({
 });
 export type CreateCategoryDto = z.infer<typeof createCategorySchema>;
 
-export const updateCategorySchema = z.strictObject({
-    name: nameSchema,
-});
+export const updateCategorySchema = createCategorySchema
+    .strict()
+    .partial()
+    .refine((data) => Object.keys(data).length > 0, {
+        error: 'At least one field should be provided!',
+    });
 export type UpdateCategoryDto = z.infer<typeof updateCategorySchema>;
