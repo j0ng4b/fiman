@@ -23,7 +23,7 @@ export class CategoryIsSystemError extends Error {
 
     constructor(
         readonly id: number,
-        readonly action: 'update' | 'disable' | 'delete' | 'enable' | 'disable',
+        readonly action: 'update' | 'delete' | 'enable' | 'disable',
     ) {
         super(`System category with ID ${id} cannot be ${action}d`);
         this.name = CategoryIsSystemError.name;

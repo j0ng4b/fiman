@@ -1,9 +1,5 @@
-import {
-    ArgumentsHost,
-    Catch,
-    HttpException,
-    NotFoundException,
-} from '@nestjs/common';
+import type { ArgumentsHost, HttpException } from '@nestjs/common';
+import { Catch, NotFoundException } from '@nestjs/common';
 import { BaseExceptionFilter } from '@nestjs/core';
 
 import { UserNotFoundError } from './users.exceptions.ts';

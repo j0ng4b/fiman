@@ -15,9 +15,9 @@ import type { SetActiveDto } from '../common/dto.ts';
 import { idSchema, setActiveSchema } from '../common/dto.ts';
 
 import type { CreateAccountDto, UpdateAccountDto } from './accounts.dto.ts';
+import type { Account } from './accounts.schema.ts';
 import { createAccountSchema, updateAccountSchema } from './accounts.dto.ts';
 import { AccountsExceptionFilter } from './accounts.filter.ts';
-import { Account } from './accounts.schema.ts';
 import { AccountsService } from './accounts.service.ts';
 
 @Controller('/users/:userId/accounts')
