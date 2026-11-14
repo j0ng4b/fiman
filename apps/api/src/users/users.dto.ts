@@ -1,7 +1,9 @@
 import { z } from 'zod';
 
+import { nameSchema } from '../common/dto.ts';
+
 export const createUserSchema = z.object({
-    name: z.string().trim().min(1).max(100),
+    name: nameSchema,
 });
 export type CreateUserDto = z.infer<typeof createUserSchema>;
 

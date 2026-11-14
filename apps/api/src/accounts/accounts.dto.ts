@@ -1,8 +1,10 @@
 import { z } from 'zod';
 
+import { dateSchema, nameSchema } from '../common/dto.ts';
+
 export const createAccountSchema = z.object({
-    name: z.string().trim().min(1).max(100),
-    startDate: z.iso.date().optional(),
+    name: nameSchema,
+    startDate: dateSchema.optional(),
     initialBalance: z.int32(),
 });
 export type CreateAccountDto = z.infer<typeof createAccountSchema>;

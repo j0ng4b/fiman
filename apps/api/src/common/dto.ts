@@ -14,6 +14,8 @@ export const monthStartSchema = z.iso
         error: 'Must be the first day of a month',
     });
 
+export const nameSchema = z.string().trim().min(1).max(100);
+
 export const descriptionSchema = z.string().trim().min(1).max(255);
 
 /** I = income, E = Expense. */
