@@ -1,4 +1,4 @@
-import { NewCategory } from './categories.schema.ts';
+import type { NewCategory } from './categories.schema.ts';
 
 export const SYSTEM_CATEGORIES = [
     { name: 'Outros', type: 'I' },

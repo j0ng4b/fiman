@@ -8,14 +8,15 @@ import {
     isUniqueViolation,
 } from '../database/database.utils.ts';
 import { SYSTEM_CATEGORIES } from './categories.constants.ts';
-import { CreateCategoryDto, UpdateCategoryDto } from './categories.dto.ts';
+import type { CreateCategoryDto, UpdateCategoryDto } from './categories.dto.ts';
 import {
     CategoryAlreadyExistsError,
     CategoryInUseError,
     CategoryIsSystemError,
     CategoryNotFoundError,
 } from './categories.exceptions.ts';
-import { categoriesTable, Category } from './categories.schema.ts';
+import type { Category } from './categories.schema.ts';
+import { categoriesTable } from './categories.schema.ts';
 
 @Injectable()
 export class CategoriesService {
