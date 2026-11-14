@@ -13,6 +13,7 @@ import {
 
 import type { SetActiveDto } from '../common/dto.ts';
 import { idSchema, setActiveSchema } from '../common/dto.ts';
+
 import type { CreateAccountDto, UpdateAccountDto } from './accounts.dto.ts';
 import { createAccountSchema, updateAccountSchema } from './accounts.dto.ts';
 import { AccountsExceptionFilter } from './accounts.filter.ts';

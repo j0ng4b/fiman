@@ -1,8 +1,8 @@
+import type { TestProject } from 'vitest/node';
 import { PostgreSqlContainer } from '@testcontainers/postgresql';
 import { drizzle } from 'drizzle-orm/node-postgres';
 import { migrate } from 'drizzle-orm/node-postgres/migrator';
 import { Pool } from 'pg';
-import type { TestProject } from 'vitest/node';
 
 declare module 'vitest' {
     export interface ProvidedContext {

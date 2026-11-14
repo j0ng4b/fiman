@@ -1,6 +1,6 @@
+import type { NestExpressApplication } from '@nestjs/platform-express';
 import { StandardSchemaValidationPipe } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
-import type { NestExpressApplication } from '@nestjs/platform-express';
 
 import { AppModule } from './app.module.ts';
 

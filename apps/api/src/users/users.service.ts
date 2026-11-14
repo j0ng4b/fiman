@@ -1,11 +1,12 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { eq } from 'drizzle-orm';
 
-import { DATABASE } from '../database/database.constants.ts';
 import type { Database } from '../database/database.types.ts';
+import { DATABASE } from '../database/database.constants.ts';
+
 import type { CreateUserDto, UpdateUserDto } from './users.dto.ts';
-import { UserNotFoundError } from './users.exceptions.ts';
 import type { User } from './users.schema.ts';
+import { UserNotFoundError } from './users.exceptions.ts';
 import { usersTable } from './users.schema.ts';
 
 @Injectable()

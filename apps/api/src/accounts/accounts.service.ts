@@ -1,24 +1,25 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { and, eq, or } from 'drizzle-orm';
 
-import { todayISO } from '../common/dates.ts';
-import { DATABASE } from '../database/database.constants.ts';
 import type {
     Database,
     DbExecutor,
     Transaction,
 } from '../database/database.types.ts';
+import { todayISO } from '../common/dates.ts';
+import { DATABASE } from '../database/database.constants.ts';
 import { isForeignKeyViolation } from '../database/database.utils.ts';
 import { transactionsTable } from '../transactions/transactions.schema.ts';
 import { transfersTable } from '../transfers/transfers.schema.ts';
+
 import type { CreateAccountDto, UpdateAccountDto } from './accounts.dto.ts';
+import type { Account } from './accounts.schema.ts';
 import {
     AccountHasMovementsError,
     AccountInUseError,
     AccountNotFoundError,
     InvalidAccountStartDateError,
 } from './accounts.exceptions.ts';
-import type { Account } from './accounts.schema.ts';
 import { accountsTable } from './accounts.schema.ts';
 
 @Injectable()

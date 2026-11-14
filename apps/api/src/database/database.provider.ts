@@ -3,9 +3,9 @@ import { ConfigService } from '@nestjs/config';
 import { DrizzleQueryError, sql } from 'drizzle-orm';
 import { drizzle } from 'drizzle-orm/node-postgres';
 
+import type { Database } from './database.types.ts';
 import { DATABASE } from './database.constants.ts';
 import { DatabaseConnectionError } from './database.exceptions.ts';
-import type { Database } from './database.types.ts';
 
 export const DatabaseProvider = {
     provide: DATABASE,

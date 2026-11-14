@@ -1,21 +1,22 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { and, eq } from 'drizzle-orm';
 
-import { DATABASE } from '../database/database.constants.ts';
 import type { Database, DbExecutor } from '../database/database.types.ts';
+import { DATABASE } from '../database/database.constants.ts';
 import {
     isForeignKeyViolation,
     isUniqueViolation,
 } from '../database/database.utils.ts';
-import { SYSTEM_CATEGORIES } from './categories.constants.ts';
+
 import type { CreateCategoryDto, UpdateCategoryDto } from './categories.dto.ts';
+import type { Category } from './categories.schema.ts';
+import { SYSTEM_CATEGORIES } from './categories.constants.ts';
 import {
     CategoryAlreadyExistsError,
     CategoryInUseError,
     CategoryIsSystemError,
     CategoryNotFoundError,
 } from './categories.exceptions.ts';
-import type { Category } from './categories.schema.ts';
 import { categoriesTable } from './categories.schema.ts';
 
 @Injectable()
