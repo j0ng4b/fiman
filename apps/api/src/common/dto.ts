@@ -8,6 +8,12 @@ export const amountSchema = z.int32().positive();
 
 export const dateSchema = z.iso.date();
 
+export const monthStartSchema = z.iso
+    .date()
+    .refine((data) => data.endsWith('-01'), {
+        error: 'Must be the first day of a month',
+    });
+
 export const descriptionSchema = z.string().trim().min(1).max(255);
 
 /** I = income, E = Expense. */

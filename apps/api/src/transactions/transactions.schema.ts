@@ -17,7 +17,11 @@ import { categoriesTable, entryType } from '../categories/categories.schema.ts';
 import { installmentsTable } from '../installments/installments.schema.ts';
 import { usersTable } from '../users/users.schema.ts';
 
-export const transactionStatus = pgEnum('transaction_status', ['P', 'C', 'X']);
+export const TRANSACTION_STATUSES = ['P', 'C', 'X'] as const;
+export const transactionStatus = pgEnum(
+    'transaction_status',
+    TRANSACTION_STATUSES,
+);
 
 export const transactionsTable = snakeCase.table(
     'transactions',
