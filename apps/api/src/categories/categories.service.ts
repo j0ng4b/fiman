@@ -54,7 +54,6 @@ export class CategoriesService {
      * Retrieve the categories of a user.
      *
      * @param userId User owner of the categories.
-     * @param query Optional filters.
      *
      * @returns The matching categories, ordered by type and name.
      */
