@@ -1,3 +1,4 @@
+import type { InferInsertModel, InferSelectModel } from 'drizzle-orm';
 import { sql } from 'drizzle-orm';
 import {
     check,
@@ -130,3 +131,6 @@ export const transactionsTable = snakeCase.table(
         ),
     ],
 );
+
+export type Transaction = InferInsertModel<typeof transactionsTable>;
+export type NewTransaction = InferSelectModel<typeof transactionsTable>;
