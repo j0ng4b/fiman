@@ -4,7 +4,7 @@ import { and, eq, or } from 'drizzle-orm';
 import type {
     Database,
     DbExecutor,
-    Transaction,
+    DbTransaction,
 } from '../database/database.types.ts';
 import { todayISO } from '../common/dates.ts';
 import { DATABASE } from '../database/database.constants.ts';
@@ -122,7 +122,7 @@ export class AccountsService {
             return await this.applyUpdate(this.db, userId, accountId, data);
         }
 
-        return await this.db.transaction(async (tx: Transaction) => {
+        return await this.db.transaction(async (tx: DbTransaction) => {
             const [locked] = await tx
                 .select({ id: accountsTable.id })
                 .from(accountsTable)
