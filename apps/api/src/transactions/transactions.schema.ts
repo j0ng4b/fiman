@@ -132,5 +132,5 @@ export const transactionsTable = snakeCase.table(
     ],
 );
 
-export type Transaction = InferInsertModel<typeof transactionsTable>;
-export type NewTransaction = InferSelectModel<typeof transactionsTable>;
+export type Transaction = InferSelectModel<typeof transactionsTable>;
+export type NewTransaction = InferInsertModel<typeof transactionsTable>;
