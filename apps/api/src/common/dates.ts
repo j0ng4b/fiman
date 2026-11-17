@@ -8,16 +8,26 @@ const formatter = new Intl.DateTimeFormat('en-US', {
 });
 
 /**
- * Returns the current civil date in the application time zone
- * (America/Sao_Paulo), formatted as `YYYY-MM-DD`.
+ * Returns the current civil date in the application time zone.
  *
- * @param now Instant to convert. Defaults to the current time.
- *
- * @returns The date as `YYYY-MM-DD`.
+ * @returns The civil date in `YYYY-MM-DD` format.
  */
-export function todayISO(now: Date = new Date()): string {
+export function todayISO(): string {
     const parts = Object.fromEntries(
-        formatter.formatToParts(now).map((part) => [part.type, part.value]),
+        formatter
+            .formatToParts(new Date())
+            .map((part) => [part.type, part.value]),
     );
     return `${parts.year}-${parts.month}-${parts.day}`;
+}
+
+/**
+ * Returns the first day of the month for a given civil date.
+ *
+ * @param date - Civil date in `YYYY-MM-DD` format.
+ *
+ * @returns The first day of the month as `YYYY-MM-01` format.
+ */
+export function firstOfMonth(date: string): string {
+    return `${date.slice(0, 7)}-01`;
 }
