@@ -1,4 +1,4 @@
-import { todayISO, firstOfMonth } from './dates.ts';
+import { todayISO, firstOfMonth } from '../../src/common/dates.ts';
 
 describe('todayISO', () => {
     beforeAll(() => {
