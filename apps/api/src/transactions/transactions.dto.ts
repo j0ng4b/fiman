@@ -17,66 +17,52 @@ export type TransactionStatus = z.infer<typeof transactionStatusSchema>;
 const baseTransactionSchema = z.strictObject({
     type: entryTypeSchema,
     description: descriptionSchema,
-    amount: amountSchema,
-    dueDate: dateSchema,
-    accountingMonth: monthStartSchema.optional(),
+    accountingMonth: monthStartSchema.optional(), // default: month of the due date
     accountId: idSchema,
-    categoryId: idSchema,
+    categoryId: idSchema.optional(), // default: system category of the type
 });
 
 const plannedSchema = baseTransactionSchema.extend({
     status: z.literal('P'),
+    amount: amountSchema,
+    dueDate: dateSchema,
 });
 
+// The planned amount and due date of a realized transaction are derived from
+// the realized ones (RN-014), so the client does not send them.
 const realizedSchema = baseTransactionSchema.extend({
     status: z.literal('C'),
     paidAmount: amountSchema,
-    transactionDate: dateSchema,
+    transactionDate: dateSchema.optional(), // default: today
 });
 
-export const createTransactionSchema = z
-    .discriminatedUnion('status', [plannedSchema, realizedSchema])
-    .refine(
-        (data) =>
-            data.accountingMonth === undefined ||
-            data.accountingMonth <= data.dueDate,
-        {
-            path: ['accountingMonth'],
-            error: 'Competence month cannot be after the due date',
-        },
-    );
+export const createTransactionSchema = z.discriminatedUnion('status', [
+    plannedSchema,
+    realizedSchema,
+]);
 export type CreateTransactionDto = z.infer<typeof createTransactionSchema>;
 
-// Only planned transactions are editable. The type is immutable (the
-// category must match it) and the status changes through its own operations.
+// The type, the account and the status are not editable here: the status
+// changes through realize, cancel and reverse. What a realized transaction
+// accepts (description and category only) depends on its state, so the
+// service enforces it.
 export const updateTransactionSchema = z
     .strictObject({
         description: descriptionSchema,
         amount: amountSchema,
         dueDate: dateSchema,
         accountingMonth: monthStartSchema,
-        accountId: idSchema,
         categoryId: idSchema,
     })
     .partial()
     .refine((data) => Object.keys(data).length > 0, {
         error: 'At least one field should be provided!',
-    })
-    .refine(
-        (data) =>
-            data.accountingMonth === undefined ||
-            data.dueDate === undefined ||
-            data.accountingMonth <= data.dueDate,
-        {
-            path: ['accountingMonth'],
-            error: 'Competence month cannot be after the due date',
-        },
-    );
+    });
 export type UpdateTransactionDto = z.infer<typeof updateTransactionSchema>;
 
 export const realizeTransactionSchema = z.strictObject({
     paidAmount: amountSchema,
-    transactionDate: dateSchema,
+    transactionDate: dateSchema.optional(), // default: today
 });
 export type RealizeTransactionDto = z.infer<typeof realizeTransactionSchema>;
 
