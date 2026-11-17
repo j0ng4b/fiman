@@ -4,6 +4,7 @@ import { BaseExceptionFilter } from '@nestjs/core';
 
 import {
     CategoryAlreadyExistsError,
+    CategoryInactiveError,
     CategoryInUseError,
     CategoryIsSystemError,
     CategoryNotFoundError,
@@ -13,7 +14,8 @@ type CategoriesError =
     | CategoryNotFoundError
     | CategoryIsSystemError
     | CategoryAlreadyExistsError
-    | CategoryInUseError;
+    | CategoryInUseError
+    | CategoryInactiveError;
 
 function toHttpException(error: CategoriesError): HttpException {
     const options = { errorCode: error.code };
@@ -25,6 +27,7 @@ function toHttpException(error: CategoriesError): HttpException {
         case 'CATEGORY_IS_SYSTEM':
         case 'CATEGORY_ALREADY_EXISTS':
         case 'CATEGORY_IN_USE':
+        case 'CATEGORY_INACTIVE':
             return new ConflictException(error.message, options);
 
         default: {
