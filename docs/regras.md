@@ -1,7 +1,7 @@
 # Regras de negócio
 
 - **Status:** Pronto
-- **Versão:** 1.3
+- **Versão:** 1.4
 - **Última atualização:** 17-11-2026
 
 As regras que o sistema sempre cumpre: o que é válido, como se calcula e o que é
@@ -53,8 +53,9 @@ podem ser excluídas permanentemente.
 
 **Tipo:** Restrição
 
-Contas e categorias inativas não podem ser usadas em novos registros e
-permanecem no histórico.
+Contas e categorias inativas não podem ser usadas em novos registros out para
+troca de categorias e permanecem no histórico. Lançamentos com contas ou
+categorias inativas não são afetados.
 
 ## Contas
 
@@ -122,15 +123,15 @@ O tipo do lançamento define o sinal na soma: receitas somam e despesas subtraem
 
 Um lançamento pode ser criado como Previsto ou diretamente como Realizado. O
 Previsto possui valor previsto e data prevista. O Realizado possui também valor
-realizado e data realizada, que não pode ser posterior a hoje.
+realizado e data realizada (padrão: hoje), que não pode ser posterior a hoje.
 
 ### RN-013
 
 **Tipo:** Restrição
 
 Só um Previsto pode ser confirmado. A confirmação acrescenta a data realizada
-(padrão: hoje) e o valor realizado, sem alterar o valor previsto, a data
-prevista, a conta nem o mês de competência.
+(padrão: hoje, não posterior a hoje) e o valor realizado, sem alterar o valor
+previsto, a data prevista, a conta nem o mês de competência.
 
 ### RN-014
 
@@ -160,7 +161,8 @@ a edição é rejeitada se ele ficar posterior ao mês da nova data prevista.
 
 **Tipo:** Restrição
 
-Lançamentos Previstos podem ser editados até a confirmação.
+Lançamentos Previstos podem ser editados até a confirmação, exceto o tipo e a
+conta, que nunca mudam.
 
 ### RN-018
 
