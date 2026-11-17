@@ -67,6 +67,6 @@ export const realizeTransactionSchema = z.strictObject({
 export type RealizeTransactionDto = z.infer<typeof realizeTransactionSchema>;
 
 export const reverseTransactionSchema = z.strictObject({
-    reversalDate: dateSchema,
+    reversalDate: dateSchema.optional(), // default: today
 });
 export type ReverseTransactionDto = z.infer<typeof reverseTransactionSchema>;

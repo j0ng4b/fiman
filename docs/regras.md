@@ -1,7 +1,7 @@
 # Regras de negócio
 
 - **Status:** Pronto
-- **Versão:** 1.4
+- **Versão:** 1.5
 - **Última atualização:** 17-11-2026
 
 As regras que o sistema sempre cumpre: o que é válido, como se calcula e o que é
@@ -190,10 +190,10 @@ ser alterado.
 
 **Tipo:** Restrição
 
-Um Realizado só é corrigido por estorno: recebe a data do estorno (igual ou
-posterior à data realizada) e, a partir dela, o seu efeito é anulado. É a única
-alteração permitida além de descrição e categoria, só ocorre uma vez e não pode
-ser desfeita.
+Um Realizado só é corrigido por estorno: recebe a data do estorno (padrão: hoje,
+igual ou posterior à data realizada) e, a partir dela, o seu efeito é anulado.
+É a única alteração permitida além de descrição e categoria, só ocorre uma vez e
+não pode ser desfeita.
 
 ### RN-022
 

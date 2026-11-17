@@ -456,7 +456,7 @@ export class TransactionsService {
      *
      * @param userId - ID of the transaction owner.
      * @param transactionId - ID of the transaction to reverse.
-     * @param data - Reversal date.
+     * @param data - Reversal date. Defaults today.
      *
      * @returns The transaction with its reversal date set.
      *
@@ -476,10 +476,13 @@ export class TransactionsService {
         transactionId: number,
         data: ReverseTransactionDto,
     ): Promise<Transaction> {
-        if (data.reversalDate > todayISO()) {
+        const today = todayISO();
+        const reversalDate = data.reversalDate ?? today;
+
+        if (reversalDate > today) {
             throw new TransactionDateInFutureError(
                 'reversalDate',
-                data.reversalDate,
+                reversalDate,
             );
         }
 
@@ -488,14 +491,14 @@ export class TransactionsService {
         // before the realized date.
         const [reversed] = await this.db
             .update(transactionsTable)
-            .set({ reversalDate: data.reversalDate, updatedAt: sql`now()` })
+            .set({ reversalDate, updatedAt: sql`now()` })
             .where(
                 and(
                     eq(transactionsTable.userId, userId),
                     eq(transactionsTable.id, transactionId),
                     eq(transactionsTable.status, 'C'),
                     isNull(transactionsTable.reversalDate),
-                    lte(transactionsTable.transactionDate, data.reversalDate),
+                    lte(transactionsTable.transactionDate, reversalDate),
                 ),
             )
             .returning();
@@ -504,7 +507,7 @@ export class TransactionsService {
             throw await this.whyNotReversed(
                 userId,
                 transactionId,
-                data.reversalDate,
+                reversalDate,
             );
         }
 
