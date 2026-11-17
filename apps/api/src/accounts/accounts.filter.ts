@@ -9,6 +9,7 @@ import { BaseExceptionFilter } from '@nestjs/core';
 
 import {
     AccountHasMovementsError,
+    AccountInactiveError,
     AccountInUseError,
     AccountNotFoundError,
     InvalidAccountStartDateError,
@@ -18,6 +19,7 @@ type AccountsError =
     | AccountNotFoundError
     | AccountInUseError
     | AccountHasMovementsError
+    | AccountInactiveError
     | InvalidAccountStartDateError;
 
 function toHttpException(error: AccountsError): HttpException {
@@ -29,6 +31,7 @@ function toHttpException(error: AccountsError): HttpException {
 
         case 'ACCOUNT_HAS_MOVEMENTS':
         case 'ACCOUNT_IN_USE':
+        case 'ACCOUNT_INACTIVE':
             return new ConflictException(error.message, options);
 
         case 'INVALID_ACCOUNT_START_DATE':

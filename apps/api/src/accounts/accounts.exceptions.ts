@@ -33,3 +33,14 @@ export class InvalidAccountStartDateError extends Error {
         this.name = InvalidAccountStartDateError.name;
     }
 }
+
+export class AccountInactiveError extends Error {
+    readonly code = 'ACCOUNT_INACTIVE';
+
+    constructor(readonly id: number) {
+        super(
+            `Account with ID ${id} is inactive and cannot be used in new records`,
+        );
+        this.name = AccountInactiveError.name;
+    }
+}

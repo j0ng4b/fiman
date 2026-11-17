@@ -41,3 +41,14 @@ export class CategoryAlreadyExistsError extends Error {
         this.name = CategoryAlreadyExistsError.name;
     }
 }
+
+export class CategoryInactiveError extends Error {
+    readonly code = 'CATEGORY_INACTIVE';
+
+    constructor(readonly id: number) {
+        super(
+            `Category with ID ${id} is inactive and cannot be used in new records`,
+        );
+        this.name = CategoryInactiveError.name;
+    }
+}
