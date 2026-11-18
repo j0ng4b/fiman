@@ -1,11 +1,20 @@
 import type { NestExpressApplication } from '@nestjs/platform-express';
-import { StandardSchemaValidationPipe } from '@nestjs/common';
+import {
+    ConsoleLogger,
+    filterLogLevels,
+    StandardSchemaValidationPipe,
+} from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 
 import { AppModule } from './app.module.ts';
 
 async function bootstrap(): Promise<void> {
-    const app = await NestFactory.create<NestExpressApplication>(AppModule);
+    const app = await NestFactory.create<NestExpressApplication>(AppModule, {
+        logger: new ConsoleLogger({
+            prefix: 'Fiman',
+            logLevels: filterLogLevels(process.env.LOG_LEVEL ?? 'warn'),
+        }),
+    });
 
     app.useGlobalPipes(new StandardSchemaValidationPipe());
 

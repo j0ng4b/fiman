@@ -1,4 +1,4 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { Inject, Injectable, Logger } from '@nestjs/common';
 import { and, eq } from 'drizzle-orm';
 
 import type { Database, DbExecutor } from '../database/database.types.ts';
@@ -21,6 +21,8 @@ import { categoriesTable } from './categories.schema.ts';
 
 @Injectable()
 export class CategoriesService {
+    private readonly logger = new Logger(CategoriesService.name);
+
     constructor(@Inject(DATABASE) private readonly db: Database) {}
 
     /**
