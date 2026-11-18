@@ -1,5 +1,5 @@
 import { Inject, Injectable } from '@nestjs/common';
-import { and, eq, isNull, lte, sql } from 'drizzle-orm';
+import { and, count, eq, gte, isNull, lte, sql } from 'drizzle-orm';
 
 import type { EntryType } from '../common/dto.ts';
 import type {
@@ -18,10 +18,12 @@ import {
 } from '../categories/categories.exceptions.ts';
 import { categoriesTable } from '../categories/categories.schema.ts';
 import { firstOfMonth, todayISO } from '../common/dates.ts';
+import { Page } from '../common/page.ts';
 import { DATABASE } from '../database/database.constants.ts';
 
 import type {
     CreateTransactionDto,
+    ListTransactionQuery,
     RealizeTransactionDto,
     ReverseTransactionDto,
     UpdateTransactionDto,
@@ -41,6 +43,12 @@ import {
     TransactionReversalBeforeRealizedError,
 } from './transactions.exceptions.ts';
 import { transactionsTable } from './transactions.schema.ts';
+
+const DATE_COLUMNS = {
+    dueDate: transactionsTable.dueDate,
+    transactionDate: transactionsTable.transactionDate,
+    accountingMonth: transactionsTable.accountingMonth,
+} as const;
 
 @Injectable()
 export class TransactionsService {
@@ -79,18 +87,58 @@ export class TransactionsService {
     }
 
     /**
-     * Retrieves all transactions belonging to the specified user.
+     * Retrieves a page of the transactions of a user.
      *
      * @param userId - ID of the transactions owner.
+     * @param query - Filters and pagination.
      *
-     * @returns The user's transactions, ordered by ID.
+     * @returns The requested page, ordered by the filtered date and then by ID.
      */
-    async findAll(userId: number): Promise<Transaction[]> {
-        return await this.db
-            .select()
-            .from(transactionsTable)
-            .where(eq(transactionsTable.userId, userId))
-            .orderBy(transactionsTable.id);
+    async findAll(
+        userId: number,
+        query: ListTransactionQuery,
+    ): Promise<Page<Transaction>> {
+        const dateColumn = DATE_COLUMNS[query.dateField];
+
+        const where = and(
+            eq(transactionsTable.userId, userId),
+            query.type !== undefined
+                ? eq(transactionsTable.type, query.type)
+                : undefined,
+            query.status !== undefined
+                ? eq(transactionsTable.status, query.status)
+                : undefined,
+            query.from !== undefined ? gte(dateColumn, query.from) : undefined,
+            query.to !== undefined ? lte(dateColumn, query.to) : undefined,
+            query.accountId !== undefined
+                ? eq(transactionsTable.accountId, query.accountId)
+                : undefined,
+            query.categoryId !== undefined
+                ? eq(transactionsTable.categoryId, query.categoryId)
+                : undefined,
+        );
+
+        const [items, [counted]] = await Promise.all([
+            this.db
+                .select()
+                .from(transactionsTable)
+                .where(where)
+                .orderBy(dateColumn, transactionsTable.id)
+                .limit(query.limit)
+                .offset(query.offset),
+
+            this.db
+                .select({ total: count() })
+                .from(transactionsTable)
+                .where(where),
+        ]);
+
+        return {
+            items,
+            total: counted.total,
+            limit: query.limit,
+            offset: query.offset,
+        } as Page<Transaction>;
     }
 
     /**
