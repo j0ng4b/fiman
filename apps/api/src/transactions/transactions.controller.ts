@@ -11,6 +11,7 @@ import {
     UseFilters,
 } from '@nestjs/common';
 
+import type { Page } from '../common/page.ts';
 import { idParamSchema } from '../common/dto.ts';
 import { Page } from '../common/page.ts';
 

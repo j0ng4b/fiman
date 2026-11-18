@@ -2,6 +2,7 @@ import { Inject, Injectable, Logger } from '@nestjs/common';
 import { and, count, eq, gte, isNull, lte, sql } from 'drizzle-orm';
 
 import type { EntryType } from '../common/dto.ts';
+import type { Page } from '../common/page.ts';
 import type {
     Database,
     DbExecutor,
@@ -18,7 +19,6 @@ import {
 } from '../categories/categories.exceptions.ts';
 import { categoriesTable } from '../categories/categories.schema.ts';
 import { firstOfMonth, todayISO } from '../common/dates.ts';
-import { Page } from '../common/page.ts';
 import { DATABASE } from '../database/database.constants.ts';
 
 import type {
