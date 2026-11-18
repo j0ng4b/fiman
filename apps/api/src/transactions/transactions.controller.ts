@@ -13,7 +13,6 @@ import {
 
 import type { Page } from '../common/page.ts';
 import { idParamSchema } from '../common/dto.ts';
-import { Page } from '../common/page.ts';
 
 import type {
     CreateTransactionDto,
