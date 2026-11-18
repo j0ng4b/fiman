@@ -7,13 +7,16 @@ import {
     Param,
     Patch,
     Post,
+    Query,
     UseFilters,
 } from '@nestjs/common';
 
 import { idParamSchema } from '../common/dto.ts';
+import { Page } from '../common/page.ts';
 
 import type {
     CreateTransactionDto,
+    ListTransactionQuery,
     RealizeTransactionDto,
     ReverseTransactionDto,
     UpdateTransactionDto,
@@ -21,6 +24,7 @@ import type {
 import type { Transaction } from './transactions.schema.ts';
 import {
     createTransactionSchema,
+    listTransactionsQuerySchema,
     realizeTransactionSchema,
     reverseTransactionSchema,
     updateTransactionSchema,
@@ -44,8 +48,10 @@ export class TransactionsController {
     @Get()
     async findAll(
         @Param('userId', { schema: idParamSchema }) userId: number,
-    ): Promise<Transaction[]> {
-        return await this.transactionsService.findAll(userId);
+        @Query({ schema: listTransactionsQuerySchema })
+        query: ListTransactionQuery,
+    ): Promise<Page<Transaction>> {
+        return await this.transactionsService.findAll(userId, query);
     }
 
     @Post()
