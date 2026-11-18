@@ -1,6 +1,10 @@
 import { z } from 'zod';
 
-const INT32_MAX = 2_147_483_647;
+export const INT32_MAX = 2_147_483_647;
+
+// Used when listing
+export const LIST_LIMIT_MAX = 200;
+export const LIST_LIMIT_DEFAULT = 25;
 
 export const idSchema = z.int32().positive().max(INT32_MAX);
 

@@ -5,11 +5,21 @@ import {
     dateSchema,
     descriptionSchema,
     entryTypeSchema,
+    idParamSchema,
     idSchema,
+    INT32_MAX,
+    LIST_LIMIT_DEFAULT,
+    LIST_LIMIT_MAX,
     monthStartSchema,
 } from '../common/dto.ts';
 
 import { TRANSACTION_STATUSES } from './transactions.schema.ts';
+
+export const TRANSACTION_DATE_FIELDS = [
+    'dueDate',
+    'transactionDate',
+    'accountingMonth',
+] as const;
 
 export const transactionStatusSchema = z.enum(TRANSACTION_STATUSES);
 export type TransactionStatus = z.infer<typeof transactionStatusSchema>;
@@ -70,3 +80,35 @@ export const reverseTransactionSchema = z.strictObject({
     reversalDate: dateSchema.optional(), // default: today
 });
 export type ReverseTransactionDto = z.infer<typeof reverseTransactionSchema>;
+
+export const listTransactionsQuerySchema = z
+    .object({
+        type: entryTypeSchema.optional(),
+        status: transactionStatusSchema.optional(),
+
+        dateField: z.enum(TRANSACTION_DATE_FIELDS).default('dueDate'),
+        from: dateSchema.optional(),
+        to: dateSchema.optional(),
+
+        limit: z.coerce
+            .number()
+            .int()
+            .min(1)
+            .max(LIST_LIMIT_MAX)
+            .default(LIST_LIMIT_DEFAULT),
+        offset: z.coerce.number().int().min(0).max(INT32_MAX).default(0),
+
+        accountId: idParamSchema.optional(),
+        categoryId: idParamSchema.optional(),
+    })
+    .refine(
+        (query) =>
+            query.from === undefined ||
+            query.to === undefined ||
+            query.from <= query.to,
+        {
+            path: ['to'],
+            error: 'The end date cannot be before the start date',
+        },
+    );
+export type ListTransactionQuery = z.infer<typeof listTransactionsQuerySchema>;
