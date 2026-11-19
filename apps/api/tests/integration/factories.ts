@@ -1,6 +1,6 @@
-import type { Database } from '../src/database/database.types.ts';
-import { accountsTable } from '../src/accounts/accounts.schema.ts';
-import { usersTable } from '../src/users/users.schema.ts';
+import type { Database } from '../../src/database/database.types.ts';
+import { accountsTable } from '../../src/accounts/accounts.schema.ts';
+import { usersTable } from '../../src/users/users.schema.ts';
 
 function first<T>(rows: T[]): T {
     const [row] = rows;

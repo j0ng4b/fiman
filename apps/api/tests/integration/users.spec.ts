@@ -10,9 +10,8 @@ import { UserNotFoundError } from '../../src/users/users.exceptions.ts';
 import { usersTable } from '../../src/users/users.schema.ts';
 import { UsersService } from '../../src/users/users.service.ts';
 
+import { createUser } from './factories.ts';
 import { createTestDatabase, resetDatabase } from './helpers/database.ts';
-
-import { createUser } from '../../tests/factories.ts';
 
 describe('UsersService', () => {
     let db: Database;
