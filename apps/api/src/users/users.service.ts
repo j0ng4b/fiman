@@ -1,7 +1,8 @@
 import { Inject, Injectable, Logger } from '@nestjs/common';
 import { eq } from 'drizzle-orm';
 
-import type { Database } from '../database/database.types.ts';
+import type { Database, DbTransaction } from '../database/database.types.ts';
+import { CategoriesService } from '../categories/categories.service.ts';
 import { DATABASE } from '../database/database.constants.ts';
 
 import type { CreateUserDto, UpdateUserDto } from './users.dto.ts';
@@ -13,25 +14,28 @@ import { usersTable } from './users.schema.ts';
 export class UsersService {
     private readonly logger = new Logger(UsersService.name);
 
-    constructor(@Inject(DATABASE) private readonly db: Database) {}
+    constructor(
+        @Inject(DATABASE) private readonly db: Database,
+        private readonly categoriesService: CategoriesService,
+    ) {}
 
     /**
-     * Find a user by its ID.
+     * Retrieves a user by its ID.
      *
-     * @param id User identifier.
+     * @param userId - ID of the user.
      *
      * @returns The requested user.
      *
-     * @throws UserNotFoundError If the user does not exist.
+     * @throws {UserNotFoundError} - If the user does not exist.
      */
-    async findById(id: number): Promise<User> {
+    async findById(userId: number): Promise<User> {
         const [user] = await this.db
             .select()
             .from(usersTable)
-            .where(eq(usersTable.id, id));
+            .where(eq(usersTable.id, userId));
 
         if (!user) {
-            throw new UserNotFoundError(id);
+            throw new UserNotFoundError(userId);
         }
 
         return user;
@@ -47,41 +51,48 @@ export class UsersService {
     }
 
     /**
-     * Create a new user.
+     * Creates a user.
      *
-     * @param dto Data used to create the user.
+     * The system categories are created upon user creation.
+     *
+     * @param data - Data used to create the user.
      *
      * @returns The newly created user.
      */
-    async create(dto: CreateUserDto): Promise<User> {
-        const [user] = await this.db.insert(usersTable).values(dto).returning();
-        if (!user) {
-            // TODO: Replace error to domain specific error
-            throw new Error("Insert didn't return a row.");
-        }
+    async create(data: CreateUserDto): Promise<User> {
+        return await this.db.transaction(async (tx: DbTransaction) => {
+            const [user] = await tx.insert(usersTable).values(data).returning();
 
-        return user;
+            if (!user) {
+                throw new Error("Insert didn't return a row.");
+            }
+
+            this.logger.log(`Creating system categories for user ${user.id}`);
+            this.categoriesService.createSystemCategories(user.id, tx);
+
+            return user;
+        });
     }
 
     /**
      * Update an existing user.
      *
-     * @param id User identifier.
-     * @param dto Data used to update the user.
+     * @param userId - ID of the user to update.
+     * @param data - Data used to update the user.
      *
      * @returns The updated user.
      *
-     * @throws UserNotFoundError If the user does not exist.
+     * @throws {UserNotFoundError} - If the user does not exist.
      */
-    async update(id: number, dto: UpdateUserDto): Promise<User> {
+    async update(userId: number, data: UpdateUserDto): Promise<User> {
         const [user] = await this.db
             .update(usersTable)
-            .set(dto)
-            .where(eq(usersTable.id, id))
+            .set(data)
+            .where(eq(usersTable.id, userId))
             .returning();
 
         if (!user) {
-            throw new UserNotFoundError(id);
+            throw new UserNotFoundError(userId);
         }
 
         return user;

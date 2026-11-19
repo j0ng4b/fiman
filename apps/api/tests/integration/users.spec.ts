@@ -3,21 +3,16 @@ import { eq } from 'drizzle-orm';
 import { inject } from 'vitest';
 
 import type { Database } from '../../src/database/database.types.ts';
+import { SYSTEM_CATEGORIES } from '../../src/categories/categories.constants.ts';
 import { categoriesTable } from '../../src/categories/categories.schema.ts';
+import { CategoriesService } from '../../src/categories/categories.service.ts';
 import { UserNotFoundError } from '../../src/users/users.exceptions.ts';
 import { usersTable } from '../../src/users/users.schema.ts';
 import { UsersService } from '../../src/users/users.service.ts';
 
-import { createUser } from '../../tests/factories.ts';
-import {
-    createTestDatabase,
-    resetDatabase,
-} from '../../tests/helpers/database.ts';
+import { createTestDatabase, resetDatabase } from './helpers/database.ts';
 
-const SYSTEM_CATEGORIES = [
-    { name: 'Outros', type: 'I' },
-    { name: 'Outros', type: 'E' },
-] as const;
+import { createUser } from '../../tests/factories.ts';
 
 describe('UsersService', () => {
     let db: Database;
@@ -26,7 +21,7 @@ describe('UsersService', () => {
 
     beforeAll(() => {
         ({ db, pool } = createTestDatabase(inject('databaseUrl')));
-        service = new UsersService(db);
+        service = new UsersService(db, new CategoriesService(db));
     });
 
     afterAll(async () => {
@@ -106,7 +101,7 @@ describe('UsersService', () => {
             expect(first.id).not.toBe(second.id);
         });
 
-        it.fails('creates the system categories for the new user', async () => {
+        it('creates the system categories for the new user', async () => {
             const user = await service.create({ name: 'Jhon' });
 
             const categories = await db
@@ -117,12 +112,13 @@ describe('UsersService', () => {
             expect(categories).toHaveLength(2);
             expect(categories).toEqual(
                 expect.arrayContaining(
-                    SYSTEM_CATEGORIES.map((category) => ({
-                        ...category,
-                        isSystem: true,
-                        active: true,
-                        createdAt: expect.any(String),
-                    })),
+                    SYSTEM_CATEGORIES.map((category) =>
+                        expect.objectContaining({
+                            ...category,
+                            isSystem: true,
+                            active: true,
+                        }),
+                    ),
                 ),
             );
         });
