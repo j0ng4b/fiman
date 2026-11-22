@@ -1,4 +1,4 @@
-import { todayISO, firstOfMonth } from '../../src/common/dates.ts';
+import { todayISO, firstOfMonth, toISODate } from '../../src/common/dates.ts';
 
 describe('todayISO', () => {
     beforeAll(() => {
@@ -11,22 +11,26 @@ describe('todayISO', () => {
 
     it('returns the current date in the application time zone', () => {
         vi.setSystemTime(new Date('2026-11-10T15:00:00Z'));
-
         expect(todayISO()).toBe('2026-11-10');
     });
 
-    it('uses the São Paulo date when UTC is already the next day', () => {
-        // 22:00 on November 10 in São Paulo is 01:00 on November 11 in UTC.
-        vi.setSystemTime(new Date('2026-11-11T01:00:00Z'));
-
+    it('returns the previous UTC date when São Paulo is still on the previous day', () => {
+        vi.setSystemTime(new Date('2026-11-10T15:00:00Z'));
         expect(todayISO()).toBe('2026-11-10');
     });
+});
 
-    it('uses the next day when the date changes in São Paulo', () => {
-        // 21:00 on November 10 in São Paulo is 00:00 on November 11 in UTC.
-        vi.setSystemTime(new Date('2026-11-11T00:00:00Z'));
+describe('toISODate', () => {
+    it('returns the date in the application time zone', () => {
+        expect(toISODate(new Date('2026-11-11T01:00:00Z'))).toBe('2026-11-10');
+    });
 
-        expect(todayISO()).toBe('2026-11-10');
+    it('preserves the date when UTC and São Paulo are on the same day', () => {
+        expect(toISODate(new Date('2026-11-10T15:00:00Z'))).toBe('2026-11-10');
+    });
+
+    it('returns the previous day when São Paulo is behind UTC', () => {
+        expect(toISODate(new Date('2026-11-10T02:00:00Z'))).toBe('2026-11-09');
     });
 });
 
@@ -35,7 +39,7 @@ describe('firstOfMonth', () => {
         expect(firstOfMonth('2026-11-17')).toBe('2026-11-01');
     });
 
-    it('preserves the year and month', () => {
+    it('handles year transitions', () => {
         expect(firstOfMonth('2027-01-31')).toBe('2027-01-01');
     });
 });

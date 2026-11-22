@@ -10,13 +10,22 @@ const formatter = new Intl.DateTimeFormat('en-US', {
 /**
  * Returns the current civil date in the application time zone.
  *
- * @returns The civil date in `YYYY-MM-DD` format.
+ * @returns The current civil date in `YYYY-MM-DD` format.
  */
 export function todayISO(): string {
+    return toISODate(new Date());
+}
+
+/**
+ * Converts an instant into a civil date in the application time zone.
+ *
+ * @param date - Instant to convert.
+ *
+ * @returns Civil date in `YYYY-MM-DD` format.
+ */
+export function toISODate(date: Date): string {
     const parts = Object.fromEntries(
-        formatter
-            .formatToParts(new Date())
-            .map((part) => [part.type, part.value]),
+        formatter.formatToParts(date).map(({ type, value }) => [type, value]),
     );
     return `${parts.year}-${parts.month}-${parts.day}`;
 }
