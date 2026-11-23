@@ -367,7 +367,81 @@ describe('CategoriesService', () => {
         });
     });
 
-    describe('setActive', () => {});
+    describe('setActive', () => {
+        it('successfully updates category active status', async () => {
+            const user = await createUser(db);
+            const category = await createCategory(db, user.id, 'I');
+
+            await expect(
+                service.setActive(user.id, category.id, false),
+            ).resolves.toMatchObject({ active: false });
+
+            await expect(findCategory(db, category.id)).resolves.toMatchObject({
+                active: false,
+            });
+        });
+
+        it('successfully reactivates an inactive category', async () => {
+            const user = await createUser(db);
+            const category = await createCategory(db, user.id, 'I');
+
+            await service.setActive(user.id, category.id, false);
+
+            await expect(
+                service.setActive(user.id, category.id, true),
+            ).resolves.toMatchObject({ active: true });
+
+            await expect(findCategory(db, category.id)).resolves.toMatchObject({
+                active: true,
+            });
+        });
+
+        it('throws CategoryNotFoundError when the category does not exist', async () => {
+            const user = await createUser(db);
+
+            await expect(service.setActive(user.id, 99, true)).rejects.toThrow(
+                CategoryNotFoundError,
+            );
+        });
+
+        it('throws CategoryNotFoundError when the user does not own the category', async () => {
+            const user = await createUser(db);
+            const other = await createUser(db);
+            const category = await createCategory(db, user.id, 'E');
+
+            await expect(
+                service.setActive(other.id, category.id, false),
+            ).rejects.toThrow(CategoryNotFoundError);
+
+            await expect(findCategory(db, category.id)).resolves.toMatchObject({
+                active: true,
+            });
+        });
+
+        it.for([true, false])(
+            'throws CategoryIsSystemError when the category is a system category',
+            async (active) => {
+                const user = await createUser(db);
+                const systemCategory = await createCategory(
+                    db,
+                    user.id,
+                    'I',
+                    'System Category',
+                    true,
+                );
+
+                await expect(
+                    service.setActive(user.id, systemCategory.id, active),
+                ).rejects.toThrow(CategoryIsSystemError);
+
+                await expect(
+                    findCategory(db, systemCategory.id),
+                ).resolves.toMatchObject({
+                    active: true,
+                });
+            },
+        );
+    });
 
     describe('createSystemCategories', () => {});
 });
