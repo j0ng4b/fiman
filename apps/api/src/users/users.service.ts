@@ -44,10 +44,10 @@ export class UsersService {
     /**
      * Retrieve all users.
      *
-     * @returns All registered users.
+     * @returns All registered users ordered by id.
      */
     async findAll(): Promise<User[]> {
-        return await this.db.select().from(usersTable);
+        return await this.db.select().from(usersTable).orderBy(usersTable.id);
     }
 
     /**
@@ -68,7 +68,7 @@ export class UsersService {
             }
 
             this.logger.log(`Creating system categories for user ${user.id}`);
-            this.categoriesService.createSystemCategories(user.id, tx);
+            await this.categoriesService.createSystemCategories(user.id, tx);
 
             return user;
         });

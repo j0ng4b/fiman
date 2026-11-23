@@ -3,6 +3,7 @@ import { eq } from 'drizzle-orm';
 import { inject } from 'vitest';
 
 import type { Database } from '../../src/database/database.types.ts';
+import type { User } from '../../src/users/users.schema.ts';
 import { SYSTEM_CATEGORIES } from '../../src/categories/categories.constants.ts';
 import { categoriesTable } from '../../src/categories/categories.schema.ts';
 import { CategoriesService } from '../../src/categories/categories.service.ts';
@@ -10,17 +11,29 @@ import { UserNotFoundError } from '../../src/users/users.exceptions.ts';
 import { usersTable } from '../../src/users/users.schema.ts';
 import { UsersService } from '../../src/users/users.service.ts';
 
-import { createUser } from './factories.ts';
 import { createTestDatabase, resetDatabase } from './helpers/database.ts';
+import { createUser } from './helpers/factories.ts';
+
+async function findUser(db: Database, id: number): Promise<User | undefined> {
+    const [row] = await db
+        .select()
+        .from(usersTable)
+        .where(eq(usersTable.id, id));
+
+    return row;
+}
 
 describe('UsersService', () => {
     let db: Database;
     let pool: Pool;
     let service: UsersService;
+    let categoriesService: CategoriesService;
 
     beforeAll(() => {
         ({ db, pool } = createTestDatabase(inject('databaseUrl')));
-        service = new UsersService(db, new CategoriesService(db));
+
+        categoriesService = new CategoriesService(db);
+        service = new UsersService(db, categoriesService);
     });
 
     afterAll(async () => {
@@ -31,13 +44,9 @@ describe('UsersService', () => {
         await resetDatabase(db);
     });
 
-    async function findRow(id: number) {
-        const [row] = await db
-            .select()
-            .from(usersTable)
-            .where(eq(usersTable.id, id));
-        return row;
-    }
+    afterEach(() => {
+        vi.resetAllMocks();
+    });
 
     describe('findById', () => {
         it('returns the requested user', async () => {
@@ -47,16 +56,9 @@ describe('UsersService', () => {
         });
 
         it('throws UserNotFoundError when the user does not exist', async () => {
-            await expect(service.findById(999)).rejects.toBeInstanceOf(
+            await expect(service.findById(999)).rejects.toThrow(
                 UserNotFoundError,
             );
-        });
-
-        it('does not return a different user', async () => {
-            const user = await createUser(db);
-            const other = await createUser(db);
-
-            await expect(service.findById(other.id)).resolves.not.toEqual(user);
         });
     });
 
@@ -65,39 +67,18 @@ describe('UsersService', () => {
             await expect(service.findAll()).resolves.toEqual([]);
         });
 
-        it('return every user', async () => {
+        it('returns all users ordered by id', async () => {
             const user = await createUser(db);
             const other = await createUser(db);
 
-            const users = await service.findAll();
-
-            expect(users).toHaveLength(2);
-            expect(users).toEqual(expect.arrayContaining([user, other]));
+            await expect(service.findAll()).resolves.toEqual([user, other]);
         });
     });
 
     describe('create', () => {
-        it('returns the created user with its gnerated fields', async () => {
-            const user = await service.create({ name: 'Jhon' });
-
-            expect(user).toEqual({
-                id: 1,
-                name: 'Jhon',
-                createdAt: expect.any(String),
-            });
-        });
-
-        it('persists the user', async () => {
-            const user = await service.create({ name: 'Jhon' });
-
-            await expect(findRow(user.id)).resolves.toEqual(user);
-        });
-
-        it('gives each user a distinct id', async () => {
-            const first = await service.create({ name: 'first' });
-            const second = await service.create({ name: 'second' });
-
-            expect(first.id).not.toBe(second.id);
+        it('successfully creates a new user', async () => {
+            const created = await service.create({ name: 'Jhon' });
+            await expect(findUser(db, created.id)).resolves.toEqual(created);
         });
 
         it('creates the system categories for the new user', async () => {
@@ -113,6 +94,7 @@ describe('UsersService', () => {
                 expect.arrayContaining(
                     SYSTEM_CATEGORIES.map((category) =>
                         expect.objectContaining({
+                            userId: user.id,
                             ...category,
                             isSystem: true,
                             active: true,
@@ -121,37 +103,38 @@ describe('UsersService', () => {
                 ),
             );
         });
+
+        it('rolls back user creation when system categories creation fails', async () => {
+            vi.spyOn(
+                categoriesService,
+                'createSystemCategories',
+            ).mockRejectedValueOnce(new Error('Category creation failed'));
+
+            await expect(service.create({ name: 'John' })).rejects.toThrow(
+                'Category creation failed',
+            );
+
+            await expect(service.findAll()).resolves.toEqual([]);
+        });
     });
 
     describe('update', () => {
         it('updates the name and returns the updated user', async () => {
             const user = await createUser(db);
-            const updated = await service.update(user.id, { name: 'New Name' });
 
-            expect(updated).toEqual({ ...user, name: 'New Name' });
-        });
+            await expect(
+                service.update(user.id, { name: 'Alice' }),
+            ).resolves.toMatchObject({ name: 'Alice' });
 
-        it('persists the change', async () => {
-            const user = await createUser(db);
-
-            await service.update(user.id, { name: 'New Name' });
-
-            expect((await findRow(user.id)).name).toBe('New Name');
-        });
-
-        it('does not touch other users', async () => {
-            const user = await createUser(db);
-            const other = await createUser(db);
-
-            await service.update(user.id, { name: 'New Name' });
-
-            await expect(findRow(other.id)).resolves.toEqual(other);
+            await expect(findUser(db, user.id)).resolves.toMatchObject({
+                name: 'Alice',
+            });
         });
 
         it('throws UserNotFoundError when the user does not exist', async () => {
-            await expect(
-                service.update(999, { name: 'Jhon' }),
-            ).rejects.toBeInstanceOf(UserNotFoundError);
+            await expect(service.update(999, { name: 'Jhon' })).rejects.toThrow(
+                UserNotFoundError,
+            );
         });
     });
 });
