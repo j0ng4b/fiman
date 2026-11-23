@@ -36,7 +36,8 @@ export class AccountsService {
      *
      * @returns The requested account.
      *
-     * @throws AccountNotFoundError If the account does not exist.
+     * @throws AccountNotFoundError If the account does not exist or does not
+     *   belong to the user.
      */
     async findById(userId: number, accountId: number): Promise<Account> {
         const [account] = await this.db
@@ -57,17 +58,18 @@ export class AccountsService {
     }
 
     /**
-     * Retrieve all accounts.
+     * Retrieve all accounts belonging to a user.
      *
      * @param userId User owner of the accounts.
      *
-     * @returns All registered accounts.
+     * @returns All accounts belonging to the user, ordered by ID.
      */
     async findAll(userId: number): Promise<Account[]> {
         return await this.db
             .select()
             .from(accountsTable)
-            .where(eq(accountsTable.userId, userId));
+            .where(eq(accountsTable.userId, userId))
+            .orderBy(accountsTable.id);
     }
 
     /**

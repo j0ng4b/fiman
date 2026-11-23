@@ -55,7 +55,35 @@ describe('AccountsService', () => {
         });
     });
 
-    describe('findAll', () => {});
+    describe('findAll', () => {
+        it('returns all accounts of the user ordered by id', async () => {
+            const user = await createUser(db);
+
+            const checking = await createAccount(db, user.id);
+            const investments = await createAccount(db, user.id);
+
+            await expect(service.findAll(user.id)).resolves.toEqual([
+                checking,
+                investments,
+            ]);
+        });
+
+        it('returns an empty list when the user has no accounts', async () => {
+            const user = await createUser(db);
+
+            await expect(service.findAll(user.id)).resolves.toEqual([]);
+        });
+
+        it('returns only the accounts belonging to the user', async () => {
+            const user = await createUser(db);
+            const other = await createUser(db);
+
+            const account = await createAccount(db, user.id);
+            await createAccount(db, other.id);
+
+            await expect(service.findAll(user.id)).resolves.toEqual([account]);
+        });
+    });
 
     describe('create', () => {});
 
