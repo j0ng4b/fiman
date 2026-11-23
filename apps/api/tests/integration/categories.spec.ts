@@ -443,5 +443,36 @@ describe('CategoriesService', () => {
         );
     });
 
-    describe('createSystemCategories', () => {});
+    describe('createSystemCategories', () => {
+        it('successfully creates system categories for a user', async () => {
+            const user = await createUser(db);
+
+            await expect(
+                service.createSystemCategories(user.id),
+            ).resolves.toBeUndefined();
+
+            const categories = await db
+                .select()
+                .from(categoriesTable)
+                .where(eq(categoriesTable.userId, user.id));
+
+            expect(categories).toHaveLength(2);
+            expect(categories).toEqual(
+                expect.arrayContaining([
+                    expect.objectContaining({
+                        userId: user.id,
+                        name: 'Outros',
+                        type: 'I',
+                        isSystem: true,
+                    }),
+                    expect.objectContaining({
+                        userId: user.id,
+                        name: 'Outros',
+                        type: 'E',
+                        isSystem: true,
+                    }),
+                ]),
+            );
+        });
+    });
 });
