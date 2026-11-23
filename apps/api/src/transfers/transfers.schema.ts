@@ -1,3 +1,4 @@
+import type { InferInsertModel, InferSelectModel } from 'drizzle-orm';
 import { sql } from 'drizzle-orm';
 import {
     check,
@@ -59,3 +60,6 @@ export const transfersTable = snakeCase.table(
         ),
     ],
 );
+
+export type Transfer = InferSelectModel<typeof transfersTable>;
+export type NewTransfer = InferInsertModel<typeof transfersTable>;
