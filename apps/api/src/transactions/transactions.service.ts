@@ -18,7 +18,7 @@ import {
     CategoryNotFoundError,
 } from '../categories/categories.exceptions.ts';
 import { categoriesTable } from '../categories/categories.schema.ts';
-import { firstOfMonth, todayISO } from '../common/dates.ts';
+import { firstOfMonth, today } from '../common/dates.ts';
 import { DATABASE } from '../database/database.constants.ts';
 
 import type {
@@ -170,13 +170,13 @@ export class TransactionsService {
         userId: number,
         data: CreateTransactionDto,
     ): Promise<Transaction> {
-        const today = todayISO();
-        const financials = this.resolveFinancials(data, today);
+        const date = today();
+        const financials = this.resolveFinancials(data, date);
 
         // RN-012. The realized date cannot be later than today.
         if (
             financials.transactionDate !== null &&
-            financials.transactionDate > today
+            financials.transactionDate > date
         ) {
             throw new TransactionDateInFutureError(
                 'transactionDate',
@@ -415,11 +415,11 @@ export class TransactionsService {
         transactionId: number,
         data: RealizeTransactionDto,
     ): Promise<Transaction> {
-        const today = todayISO();
-        const transactionDate = data.transactionDate ?? today;
+        const date = today();
+        const transactionDate = data.transactionDate ?? date;
 
         // RN-012. The realized date cannot be later than today.
-        if (transactionDate > today) {
+        if (transactionDate > date) {
             throw new TransactionDateInFutureError(
                 'transactionDate',
                 transactionDate,
@@ -526,10 +526,10 @@ export class TransactionsService {
         transactionId: number,
         data: ReverseTransactionDto,
     ): Promise<Transaction> {
-        const today = todayISO();
-        const reversalDate = data.reversalDate ?? today;
+        const date = today();
+        const reversalDate = data.reversalDate ?? date;
 
-        if (reversalDate > today) {
+        if (reversalDate > date) {
             throw new TransactionDateInFutureError(
                 'reversalDate',
                 reversalDate,

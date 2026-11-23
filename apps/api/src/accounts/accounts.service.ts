@@ -6,7 +6,7 @@ import type {
     DbExecutor,
     DbTransaction,
 } from '../database/database.types.ts';
-import { todayISO } from '../common/dates.ts';
+import { today } from '../common/dates.ts';
 import { DATABASE } from '../database/database.constants.ts';
 import { isForeignKeyViolation } from '../database/database.utils.ts';
 import { transactionsTable } from '../transactions/transactions.schema.ts';
@@ -82,7 +82,7 @@ export class AccountsService {
      */
     async create(userId: number, data: CreateAccountDto): Promise<Account> {
         // RN-004: the start date defaults to today and can't be in future.
-        const startDate = data.startDate ?? todayISO();
+        const startDate = data.startDate ?? today();
         this.assertStartDateNotInFuture(startDate);
 
         const [account] = await this.db
@@ -309,7 +309,7 @@ export class AccountsService {
      * @throws InvalidAccountStartDateError If the date is in the future.
      */
     private assertStartDateNotInFuture(startDate: string): void {
-        if (startDate > todayISO()) {
+        if (startDate > today()) {
             throw new InvalidAccountStartDateError(startDate);
         }
     }
