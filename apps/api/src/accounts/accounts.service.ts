@@ -78,7 +78,7 @@ export class AccountsService {
      * @param userId User owner of the account.
      * @param data Data used to create the account.
      *
-     * @returns The new created account.
+     * @returns The newly created account.
      *
      * @throws InvalidAccountStartDateError If the date is in the future.
      */
@@ -89,7 +89,7 @@ export class AccountsService {
 
         const [account] = await this.db
             .insert(accountsTable)
-            .values({ userId, ...data, startDate })
+            .values({ ...data, userId, startDate })
             .returning();
 
         if (!account) {
