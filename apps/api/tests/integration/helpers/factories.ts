@@ -35,8 +35,8 @@ export async function createUser(
 
 export async function createCategory(
     db: Database,
-    type: EntryType,
     userId: number,
+    type: EntryType,
     name: string = uniqueName('TestCategory'),
     isSystem: boolean = false,
 ): Promise<Category> {
@@ -65,10 +65,10 @@ export async function createAccount(
 
 export async function createPlannedTransaction(
     db: Database,
-    type: EntryType,
     userId: number,
     accountId: number,
     categoryId: number,
+    type: EntryType,
     amount: number = 10000,
     dueDate: IsoDate = tomorrow(),
     description: string = 'TestPlannedTransaction',
@@ -93,10 +93,10 @@ export async function createPlannedTransaction(
 
 export async function createRealizedTransaction(
     db: Database,
-    type: EntryType,
     userId: number,
     accountId: number,
     categoryId: number,
+    type: EntryType,
     amount: number = 10000,
     paidAmount: number = amount,
     transactionDate: IsoDate = today(),

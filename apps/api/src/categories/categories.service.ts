@@ -58,7 +58,8 @@ export class CategoriesService {
      *
      * @param userId User owner of the categories.
      *
-     * @returns The matching categories, ordered by type and name.
+     * @returns The matching categories, ordered by type (income before expense)
+     *   and then by name.
      */
     async findAll(userId: number): Promise<Category[]> {
         return await this.db
@@ -72,18 +73,18 @@ export class CategoriesService {
      * Create a category.
      *
      * @param userId User owner of the category.
-     * @param dto Data used to create the category.
+     * @param data Data used to create the category.
      *
      * @returns The newly created category.
      *
      * @throws CategoryAlreadyExistsError If the user already has a category
      *   with this name and type.
      */
-    async create(userId: number, dto: CreateCategoryDto): Promise<Category> {
+    async create(userId: number, data: CreateCategoryDto): Promise<Category> {
         try {
             const [category] = await this.db
                 .insert(categoriesTable)
-                .values({ ...dto, userId })
+                .values({ ...data, userId })
                 .returning();
 
             if (!category) {
@@ -93,7 +94,7 @@ export class CategoriesService {
             return category;
         } catch (error) {
             if (isUniqueViolation(error)) {
-                throw new CategoryAlreadyExistsError(dto.name, dto.type);
+                throw new CategoryAlreadyExistsError(data.name, data.type);
             }
 
             throw error;
@@ -108,7 +109,7 @@ export class CategoriesService {
      *
      * @param userId User owner of the category.
      * @param categoryId Category identifier.
-     * @param dto Data to update.
+     * @param data Data to update.
      *
      * @returns The updated category.
      *
@@ -122,14 +123,14 @@ export class CategoriesService {
     async update(
         userId: number,
         categoryId: number,
-        dto: UpdateCategoryDto,
+        data: UpdateCategoryDto,
     ): Promise<Category> {
         let category: Category | undefined;
 
         try {
             [category] = await this.db
                 .update(categoriesTable)
-                .set(dto)
+                .set(data)
                 .where(this.modifiable(userId, categoryId))
                 .returning();
         } catch (error) {
@@ -137,8 +138,8 @@ export class CategoriesService {
                 // The DTO may carry only one of the two fields.
                 const current = await this.findById(userId, categoryId);
                 throw new CategoryAlreadyExistsError(
-                    dto.name ?? current.name,
-                    dto.type ?? current.type,
+                    data.name ?? current.name,
+                    data.type ?? current.type,
                 );
             }
 
