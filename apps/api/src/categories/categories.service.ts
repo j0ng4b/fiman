@@ -198,15 +198,13 @@ export class CategoriesService {
      * @param userId User owner of the category.
      * @param categoryId Category identifier.
      *
-     * @returns The deleted category.
-     *
      * @throws CategoryNotFoundError If the category does not exist.
      * @throws CategoryIsSystemError If it is a system category.
      * @throws CategoryInUseError If transactions or installments use it.
      *
      * @see setActive
      */
-    async delete(userId: number, categoryId: number): Promise<Category> {
+    async delete(userId: number, categoryId: number): Promise<void> {
         let category: Category | undefined;
 
         try {
@@ -225,8 +223,6 @@ export class CategoriesService {
         if (!category) {
             throw await this.whyNotModified(userId, categoryId, 'delete');
         }
-
-        return category;
     }
 
     /**

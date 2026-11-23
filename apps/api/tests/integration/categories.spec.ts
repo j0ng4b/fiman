@@ -2,6 +2,7 @@ import type { Pool } from 'pg';
 import { eq } from 'drizzle-orm';
 import { inject } from 'vitest';
 
+import type { Category } from '../../src/categories/categories.schema.ts';
 import type { EntryType } from '../../src/common/dto.ts';
 import type { Database } from '../../src/database/database.types.ts';
 import {
@@ -10,10 +11,7 @@ import {
     CategoryIsSystemError,
     CategoryNotFoundError,
 } from '../../src/categories/categories.exceptions.ts';
-import {
-    categoriesTable,
-    Category,
-} from '../../src/categories/categories.schema.ts';
+import { categoriesTable } from '../../src/categories/categories.schema.ts';
 import { CategoriesService } from '../../src/categories/categories.service.ts';
 
 import { createTestDatabase, resetDatabase } from './helpers/database.ts';
@@ -24,15 +22,14 @@ import {
     createUser,
 } from './helpers/factories.ts';
 
-async function findCategory(db: Database, id: number): Promise<Category> {
+async function findCategory(
+    db: Database,
+    id: number,
+): Promise<Category | undefined> {
     const [category] = await db
         .select()
         .from(categoriesTable)
         .where(eq(categoriesTable.id, id));
-
-    if (!category) {
-        throw new Error(`Category ${id} not found`);
-    }
 
     return category;
 }
@@ -293,7 +290,82 @@ describe('CategoriesService', () => {
         });
     });
 
-    describe('delete', () => {});
+    describe('delete', () => {
+        it('successfully deletes a category', async () => {
+            const user = await createUser(db);
+            const category = await createCategory(db, user.id, 'E');
+
+            await expect(
+                service.delete(user.id, category.id),
+            ).resolves.toBeUndefined();
+
+            await expect(
+                findCategory(db, category.id),
+            ).resolves.toBeUndefined();
+        });
+
+        it('throws CategoryNotFoundError when the category does not exist', async () => {
+            const user = await createUser(db);
+
+            await expect(service.delete(user.id, 99)).rejects.toThrow(
+                CategoryNotFoundError,
+            );
+        });
+
+        it('throws CategoryNotFoundError when the user does not own the category', async () => {
+            const user = await createUser(db);
+            const other = await createUser(db);
+            const userCategory = await createCategory(db, user.id, 'E');
+
+            await expect(
+                service.delete(other.id, userCategory.id),
+            ).rejects.toThrow(CategoryNotFoundError);
+
+            await expect(findCategory(db, userCategory.id)).resolves.toEqual(
+                userCategory,
+            );
+        });
+
+        it('throws CategoryIsSystemError when the category is a system category', async () => {
+            const user = await createUser(db);
+            const systemCategory = await createCategory(
+                db,
+                user.id,
+                'I',
+                'System Category',
+                true,
+            );
+
+            await expect(
+                service.delete(user.id, systemCategory.id),
+            ).rejects.toThrow(CategoryIsSystemError);
+
+            await expect(findCategory(db, systemCategory.id)).resolves.toEqual(
+                systemCategory,
+            );
+        });
+
+        it('throws CategoryInUseError when deleting a category in use', async () => {
+            const user = await createUser(db);
+            const account = await createAccount(db, user.id);
+            const category = await createCategory(db, user.id, 'I');
+            await createPlannedTransaction(
+                db,
+                user.id,
+                account.id,
+                category.id,
+                'I',
+            );
+
+            await expect(service.delete(user.id, category.id)).rejects.toThrow(
+                CategoryInUseError,
+            );
+
+            await expect(findCategory(db, category.id)).resolves.toEqual(
+                category,
+            );
+        });
+    });
 
     describe('setActive', () => {});
 
