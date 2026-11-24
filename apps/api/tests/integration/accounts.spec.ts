@@ -296,9 +296,7 @@ describe('AccountsService', () => {
                 AccountNotFoundError,
             );
 
-            await expect(
-                findAccount(db, account.id),
-            ).resolves.not.toBeUndefined();
+            await expect(findAccount(db, account.id)).resolves.toEqual(account);
         });
 
         it('throws AccountInUseError when the account has associated transactions', async () => {
@@ -318,9 +316,7 @@ describe('AccountsService', () => {
                 AccountInUseError,
             );
 
-            await expect(
-                findAccount(db, account.id),
-            ).resolves.not.toBeUndefined();
+            await expect(findAccount(db, account.id)).resolves.toEqual(account);
         });
 
         it('throws AccountInUseError when the account has associated transfers', async () => {
@@ -334,20 +330,68 @@ describe('AccountsService', () => {
                 service.delete(user.id, fromAccount.id),
             ).rejects.toThrow(AccountInUseError);
 
-            await expect(
-                findAccount(db, fromAccount.id),
-            ).resolves.not.toBeUndefined();
+            await expect(findAccount(db, fromAccount.id)).resolves.toEqual(
+                fromAccount,
+            );
 
             // Also check when the account is the destination.
             await expect(service.delete(user.id, toAccount.id)).rejects.toThrow(
                 AccountInUseError,
             );
 
-            await expect(
-                findAccount(db, toAccount.id),
-            ).resolves.not.toBeUndefined();
+            await expect(findAccount(db, toAccount.id)).resolves.toEqual(
+                toAccount,
+            );
         });
     });
 
-    describe('disable', () => {});
+    describe('setActive', () => {
+        it('successfully updates account active status', async () => {
+            const user = await createUser(db);
+            const account = await createAccount(db, user.id);
+
+            await expect(
+                service.setActive(user.id, account.id, false),
+            ).resolves.toMatchObject({ active: false });
+
+            await expect(findAccount(db, account.id)).resolves.toMatchObject({
+                active: false,
+            });
+        });
+
+        it('successfully reactivates an inactive account', async () => {
+            const user = await createUser(db);
+            const account = await createAccount(db, user.id);
+
+            await service.setActive(user.id, account.id, false);
+
+            await expect(
+                service.setActive(user.id, account.id, true),
+            ).resolves.toMatchObject({ active: true });
+
+            await expect(findAccount(db, account.id)).resolves.toMatchObject({
+                active: true,
+            });
+        });
+
+        it('throws AccountNotFoundError when the account does not exist', async () => {
+            const user = await createUser(db);
+
+            await expect(service.setActive(user.id, 99, false)).rejects.toThrow(
+                AccountNotFoundError,
+            );
+        });
+
+        it('throws AccountNotFoundError when the user does not own the account', async () => {
+            const user = await createUser(db);
+            const other = await createUser(db);
+            const account = await createAccount(db, user.id);
+
+            await expect(
+                service.setActive(other.id, account.id, false),
+            ).rejects.toThrow(AccountNotFoundError);
+
+            await expect(findAccount(db, account.id)).resolves.toEqual(account);
+        });
+    });
 });

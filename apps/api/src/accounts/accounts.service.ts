@@ -166,7 +166,7 @@ export class AccountsService {
      * @throws AccountInUseError If the account has associated transactions or
      *   transfers.
      *
-     * @see disable
+     * @see setActive
      */
     async delete(userId: number, accountId: number): Promise<void> {
         let account: Account | undefined;
@@ -196,27 +196,28 @@ export class AccountsService {
     }
 
     /**
-     * Disable an account.
+     * Set the active status of an account.
      *
-     * Any account can be enabled/disabled at any time.
+     * Accounts can be enabled or disabled at any time, regardless of their
+     * movements.
      *
      * @param userId User owner of the account.
      * @param accountId Account identifier.
-     * @param disabled If the account should be disabled.
+     * @param active Whether the account should be active.
      *
-     * @returns The disabled account.
+     * @returns The updated account.
      *
      * @throws AccountNotFoundError If the account does not exist or does not
      *   belong to the user.
      */
-    async disable(
+    async setActive(
         userId: number,
         accountId: number,
-        disabled: boolean,
+        active: boolean,
     ): Promise<Account> {
         const [account] = await this.db
             .update(accountsTable)
-            .set({ active: !disabled })
+            .set({ active })
             .where(
                 and(
                     eq(accountsTable.id, accountId),
