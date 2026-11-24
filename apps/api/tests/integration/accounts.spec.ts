@@ -5,6 +5,7 @@ import { inject } from 'vitest';
 import type { Account } from '../../src/accounts/accounts.schema.ts';
 import type { Database } from '../../src/database/database.types.ts';
 import {
+    AccountHasMovementsError,
     AccountNotFoundError,
     InvalidAccountStartDateError,
 } from '../../src/accounts/accounts.exceptions.ts';
@@ -13,7 +14,13 @@ import { AccountsService } from '../../src/accounts/accounts.service.ts';
 import { today, tomorrow } from '../../src/common/dates.ts';
 
 import { createTestDatabase, resetDatabase } from './helpers/database.ts';
-import { createAccount, createUser } from './helpers/factories.ts';
+import {
+    createAccount,
+    createCategory,
+    createPlannedTransaction,
+    createTransfer,
+    createUser,
+} from './helpers/factories.ts';
 
 async function findAccount(
     db: Database,
@@ -141,14 +148,123 @@ describe('AccountsService', () => {
             await expect(
                 service.create(user.id, {
                     name: 'Investments',
-                    initialBalance: 0,
                     startDate: tomorrow(),
+                    initialBalance: 0,
                 }),
             ).rejects.toThrow(InvalidAccountStartDateError);
         });
     });
 
-    describe('update', () => {});
+    describe('update', () => {
+        it('successfully updates account data', async () => {
+            const user = await createUser(db);
+            const account = await createAccount(db, user.id);
+
+            const updated = await service.update(user.id, account.id, {
+                name: 'Investments',
+                startDate: '2025-08-11',
+                initialBalance: 10_000_00,
+            });
+
+            expect(updated).toMatchObject({
+                name: 'Investments',
+                startDate: '2025-08-11',
+                initialBalance: 10_000_00,
+            });
+
+            await expect(findAccount(db, account.id)).resolves.toEqual(updated);
+        });
+
+        it('throws AccountNotFoundError when the account does not exist', async () => {
+            const user = await createUser(db);
+
+            await expect(
+                service.update(user.id, 99, { name: 'NoExists' }),
+            ).rejects.toThrow(AccountNotFoundError);
+        });
+
+        it('throws AccountNotFoundError when the user does not own account', async () => {
+            const user = await createUser(db);
+            const userAccount = await createAccount(db, user.id);
+
+            const other = await createUser(db);
+
+            await expect(
+                service.update(other.id, userAccount.id, {
+                    name: 'NotTheAccountOwner',
+                }),
+            ).rejects.toThrow(AccountNotFoundError);
+        });
+
+        it('throws InvalidAccountStartDateError when the start date is in the future', async () => {
+            const user = await createUser(db);
+            const account = await createAccount(db, user.id);
+
+            await expect(
+                service.update(user.id, account.id, {
+                    startDate: tomorrow(),
+                }),
+            ).rejects.toThrow(InvalidAccountStartDateError);
+        });
+
+        it.for([
+            ['startDate', '2024-11-26'],
+            ['initialBalance', 200_00],
+        ])(
+            'rejects %s changes when the account has transactions',
+            async (data) => {
+                const user = await createUser(db);
+                const category = await createCategory(db, user.id, 'I');
+                const account = await createAccount(db, user.id);
+
+                await createPlannedTransaction(
+                    db,
+                    user.id,
+                    account.id,
+                    category.id,
+                    'I',
+                );
+
+                await expect(
+                    service.update(
+                        user.id,
+                        account.id,
+                        Object.fromEntries([data]),
+                    ),
+                ).rejects.toThrow(AccountHasMovementsError);
+            },
+        );
+
+        it.for([
+            ['startDate', '2024-11-26'],
+            ['initialBalance', 200_00],
+        ])(
+            'rejects %s changes when the account has transfers',
+            async (data) => {
+                const user = await createUser(db);
+                const fromAccount = await createAccount(db, user.id);
+                const toAccount = await createAccount(db, user.id);
+
+                await createTransfer(db, user.id, fromAccount.id, toAccount.id);
+
+                await expect(
+                    service.update(
+                        user.id,
+                        fromAccount.id,
+                        Object.fromEntries([data]),
+                    ),
+                ).rejects.toThrow(AccountHasMovementsError);
+
+                await expect(
+                    service.update(
+                        user.id,
+                        toAccount.id,
+                        Object.fromEntries([data]),
+                    ),
+                ).rejects.toThrow(AccountHasMovementsError);
+            },
+        );
+    });
 
     describe('delete', () => {});
 

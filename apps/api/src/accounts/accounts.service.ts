@@ -108,7 +108,8 @@ export class AccountsService {
      *
      * @returns The updated account.
      *
-     * @throws AccountNotFoundError If the account does not exist.
+     * @throws AccountNotFoundError If the account does not exist or does not
+     *   belong to the user.
      * @throws AccountHasMovementsError If the account already has movements.
      * @throws InvalidAccountStartDateError If the date is in the future.
      */
@@ -163,7 +164,8 @@ export class AccountsService {
      *
      * @returns The deleted account.
      *
-     * @throws AccountNotFoundError If the account does not exist.
+     * @throws AccountNotFoundError If the account does not exist or does not
+     *   belong to the user.
      * @throws AccountInUseError If there are movements or installments
      *   associated to the account.
      *
@@ -207,7 +209,8 @@ export class AccountsService {
      *
      * @returns The disabled account.
      *
-     * @throws AccountNotFoundError If the account does not exist.
+     * @throws AccountNotFoundError If the account does not exist or does not
+     *   belong to the user.
      */
     async disable(
         userId: number,
@@ -242,7 +245,8 @@ export class AccountsService {
      *
      * @returns The updated account.
      *
-     * @throws AccountNotFoundError If the account does not exist.
+     * @throws AccountNotFoundError If the account does not exist or does not
+     *   belong to the user.
      */
     private async applyUpdate(
         executor: DbExecutor,
