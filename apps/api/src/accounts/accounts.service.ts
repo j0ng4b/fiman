@@ -156,24 +156,23 @@ export class AccountsService {
     /**
      * Delete an account.
      *
-     * This action can't be reverted. Accounts referenced by installments can’t
-     * be deleted either.
+     * This action can't be reverted.
      *
      * @param userId User owner of the account.
      * @param accountId Account identifier.
      *
-     * @returns The deleted account.
-     *
      * @throws AccountNotFoundError If the account does not exist or does not
      *   belong to the user.
-     * @throws AccountInUseError If there are movements or installments
-     *   associated to the account.
+     * @throws AccountInUseError If the account has associated transactions or
+     *   transfers.
      *
      * @see disable
      */
-    async delete(userId: number, accountId: number): Promise<Account> {
+    async delete(userId: number, accountId: number): Promise<void> {
+        let account: Account | undefined;
+
         try {
-            const [account] = await this.db
+            [account] = await this.db
                 .delete(accountsTable)
                 .where(
                     and(
@@ -182,12 +181,6 @@ export class AccountsService {
                     ),
                 )
                 .returning();
-
-            if (!account) {
-                throw new AccountNotFoundError(accountId);
-            }
-
-            return account;
         } catch (error) {
             // Accounts with movements can't be deleted (RN-002).
             if (isForeignKeyViolation(error)) {
@@ -195,6 +188,10 @@ export class AccountsService {
             }
 
             throw error;
+        }
+
+        if (!account) {
+            throw new AccountNotFoundError(accountId);
         }
     }
 

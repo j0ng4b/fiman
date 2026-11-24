@@ -6,6 +6,7 @@ import type { Account } from '../../src/accounts/accounts.schema.ts';
 import type { Database } from '../../src/database/database.types.ts';
 import {
     AccountHasMovementsError,
+    AccountInUseError,
     AccountNotFoundError,
     InvalidAccountStartDateError,
 } from '../../src/accounts/accounts.exceptions.ts';
@@ -266,7 +267,87 @@ describe('AccountsService', () => {
         );
     });
 
-    describe('delete', () => {});
+    describe('delete', () => {
+        it('successfully deletes an account', async () => {
+            const user = await createUser(db);
+            const account = await createAccount(db, user.id);
+
+            await expect(
+                service.delete(user.id, account.id),
+            ).resolves.toBeUndefined();
+
+            await expect(findAccount(db, account.id)).resolves.toBeUndefined();
+        });
+
+        it('throws AccountNotFoundError when the account does not exist', async () => {
+            const user = await createUser(db);
+
+            await expect(service.delete(user.id, 99)).rejects.toThrow(
+                AccountNotFoundError,
+            );
+        });
+
+        it('throws AccountNotFoundError when the user does not own the account', async () => {
+            const user = await createUser(db);
+            const other = await createUser(db);
+            const account = await createAccount(db, user.id);
+
+            await expect(service.delete(other.id, account.id)).rejects.toThrow(
+                AccountNotFoundError,
+            );
+
+            await expect(
+                findAccount(db, account.id),
+            ).resolves.not.toBeUndefined();
+        });
+
+        it('throws AccountInUseError when the account has associated transactions', async () => {
+            const user = await createUser(db);
+            const category = await createCategory(db, user.id, 'E');
+            const account = await createAccount(db, user.id);
+
+            await createPlannedTransaction(
+                db,
+                user.id,
+                account.id,
+                category.id,
+                'E',
+            );
+
+            await expect(service.delete(user.id, account.id)).rejects.toThrow(
+                AccountInUseError,
+            );
+
+            await expect(
+                findAccount(db, account.id),
+            ).resolves.not.toBeUndefined();
+        });
+
+        it('throws AccountInUseError when the account has associated transfers', async () => {
+            const user = await createUser(db);
+            const fromAccount = await createAccount(db, user.id);
+            const toAccount = await createAccount(db, user.id);
+
+            await createTransfer(db, user.id, fromAccount.id, toAccount.id);
+
+            await expect(
+                service.delete(user.id, fromAccount.id),
+            ).rejects.toThrow(AccountInUseError);
+
+            await expect(
+                findAccount(db, fromAccount.id),
+            ).resolves.not.toBeUndefined();
+
+            // Also check when the account is the destination.
+            await expect(service.delete(user.id, toAccount.id)).rejects.toThrow(
+                AccountInUseError,
+            );
+
+            await expect(
+                findAccount(db, toAccount.id),
+            ).resolves.not.toBeUndefined();
+        });
+    });
 
     describe('disable', () => {});
 });
