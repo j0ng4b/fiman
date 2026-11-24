@@ -36,7 +36,8 @@ export class AccountsService {
      *
      * @returns The requested account.
      *
-     * @throws AccountNotFoundError If the account does not exist.
+     * @throws AccountNotFoundError If the account does not exist or does not
+     *   belong to the user.
      */
     async findById(userId: number, accountId: number): Promise<Account> {
         const [account] = await this.db
@@ -57,17 +58,18 @@ export class AccountsService {
     }
 
     /**
-     * Retrieve all accounts.
+     * Retrieve all accounts belonging to a user.
      *
      * @param userId User owner of the accounts.
      *
-     * @returns All registered accounts.
+     * @returns All accounts belonging to the user, ordered by ID.
      */
     async findAll(userId: number): Promise<Account[]> {
         return await this.db
             .select()
             .from(accountsTable)
-            .where(eq(accountsTable.userId, userId));
+            .where(eq(accountsTable.userId, userId))
+            .orderBy(accountsTable.id);
     }
 
     /**
@@ -76,7 +78,7 @@ export class AccountsService {
      * @param userId User owner of the account.
      * @param data Data used to create the account.
      *
-     * @returns The new created account.
+     * @returns The newly created account.
      *
      * @throws InvalidAccountStartDateError If the date is in the future.
      */
@@ -87,7 +89,7 @@ export class AccountsService {
 
         const [account] = await this.db
             .insert(accountsTable)
-            .values({ userId, ...data, startDate })
+            .values({ ...data, userId, startDate })
             .returning();
 
         if (!account) {
@@ -106,7 +108,8 @@ export class AccountsService {
      *
      * @returns The updated account.
      *
-     * @throws AccountNotFoundError If the account does not exist.
+     * @throws AccountNotFoundError If the account does not exist or does not
+     *   belong to the user.
      * @throws AccountHasMovementsError If the account already has movements.
      * @throws InvalidAccountStartDateError If the date is in the future.
      */
@@ -153,23 +156,23 @@ export class AccountsService {
     /**
      * Delete an account.
      *
-     * This action can't be reverted. Accounts referenced by installments can’t
-     * be deleted either.
+     * This action can't be reverted.
      *
      * @param userId User owner of the account.
      * @param accountId Account identifier.
      *
-     * @returns The deleted account.
+     * @throws AccountNotFoundError If the account does not exist or does not
+     *   belong to the user.
+     * @throws AccountInUseError If the account has associated transactions or
+     *   transfers.
      *
-     * @throws AccountNotFoundError If the account does not exist.
-     * @throws AccountInUseError If there are movements or installments
-     *   associated to the account.
-     *
-     * @see disable
+     * @see setActive
      */
-    async delete(userId: number, accountId: number): Promise<Account> {
+    async delete(userId: number, accountId: number): Promise<void> {
+        let account: Account | undefined;
+
         try {
-            const [account] = await this.db
+            [account] = await this.db
                 .delete(accountsTable)
                 .where(
                     and(
@@ -178,12 +181,6 @@ export class AccountsService {
                     ),
                 )
                 .returning();
-
-            if (!account) {
-                throw new AccountNotFoundError(accountId);
-            }
-
-            return account;
         } catch (error) {
             // Accounts with movements can't be deleted (RN-002).
             if (isForeignKeyViolation(error)) {
@@ -192,29 +189,35 @@ export class AccountsService {
 
             throw error;
         }
+
+        if (!account) {
+            throw new AccountNotFoundError(accountId);
+        }
     }
 
     /**
-     * Disable an account.
+     * Set the active status of an account.
      *
-     * Any account can be enabled/disabled at any time.
+     * Accounts can be enabled or disabled at any time, regardless of their
+     * movements.
      *
      * @param userId User owner of the account.
      * @param accountId Account identifier.
-     * @param disabled If the account should be disabled.
+     * @param active Whether the account should be active.
      *
-     * @returns The disabled account.
+     * @returns The updated account.
      *
-     * @throws AccountNotFoundError If the account does not exist.
+     * @throws AccountNotFoundError If the account does not exist or does not
+     *   belong to the user.
      */
-    async disable(
+    async setActive(
         userId: number,
         accountId: number,
-        disabled: boolean,
+        active: boolean,
     ): Promise<Account> {
         const [account] = await this.db
             .update(accountsTable)
-            .set({ active: !disabled })
+            .set({ active })
             .where(
                 and(
                     eq(accountsTable.id, accountId),
@@ -240,7 +243,8 @@ export class AccountsService {
      *
      * @returns The updated account.
      *
-     * @throws AccountNotFoundError If the account does not exist.
+     * @throws AccountNotFoundError If the account does not exist or does not
+     *   belong to the user.
      */
     private async applyUpdate(
         executor: DbExecutor,

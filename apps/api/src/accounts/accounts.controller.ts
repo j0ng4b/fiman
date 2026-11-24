@@ -72,6 +72,6 @@ export class AccountsController {
         @Param('id', { schema: idParamSchema }) id: number,
         @Body({ schema: setActiveSchema }) data: SetActiveDto,
     ): Promise<Account> {
-        return await this.accountsService.disable(userId, id, !data.active);
+        return await this.accountsService.setActive(userId, id, data.active);
     }
 }
