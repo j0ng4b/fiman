@@ -20,6 +20,7 @@ export const TRANSACTION_DATE_FIELDS = [
     'transactionDate',
     'accountingMonth',
 ] as const;
+export type TransactionDateField = (typeof TRANSACTION_DATE_FIELDS)[number];
 
 export const transactionStatusSchema = z.enum(TRANSACTION_STATUSES);
 export type TransactionStatus = z.infer<typeof transactionStatusSchema>;

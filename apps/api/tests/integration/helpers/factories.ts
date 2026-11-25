@@ -91,6 +91,31 @@ export async function createPlannedTransaction(
     );
 }
 
+export async function createCanceledTransaction(
+    db: Database,
+    userId: number,
+    accountId: number,
+    categoryId: number,
+    type: EntryType,
+): Promise<Transaction> {
+    return first(
+        await db
+            .insert(transactionsTable)
+            .values({
+                type,
+                status: 'X',
+                userId,
+                accountId,
+                categoryId,
+                description: 'TestCanceledTransaction',
+                dueDate: tomorrow(),
+                amount: 1000_00,
+                accountingMonth: firstOfMonth(tomorrow()),
+            })
+            .returning(),
+    );
+}
+
 export async function createRealizedTransaction(
     db: Database,
     userId: number,

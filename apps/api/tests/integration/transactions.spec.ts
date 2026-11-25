@@ -3,7 +3,12 @@ import { inject } from 'vitest';
 
 import type { Account } from '../../src/accounts/accounts.schema.ts';
 import type { Category } from '../../src/categories/categories.schema.ts';
+import type { EntryType } from '../../src/common/dto.ts';
 import type { Database } from '../../src/database/database.types.ts';
+import type {
+    TransactionDateField,
+    TransactionStatus,
+} from '../../src/transactions/transactions.dto.ts';
 import type { Transaction } from '../../src/transactions/transactions.schema.ts';
 import type { User } from '../../src/users/users.schema.ts';
 import { TransactionNotFoundError } from '../../src/transactions/transactions.exceptions.ts';
@@ -12,6 +17,7 @@ import { TransactionsService } from '../../src/transactions/transactions.service
 import { createTestDatabase, resetDatabase } from './helpers/database.ts';
 import {
     createAccount,
+    createCanceledTransaction,
     createCategory,
     createPlannedTransaction,
     createRealizedTransaction,
@@ -174,6 +180,349 @@ describe('TransactionService', () => {
                 items: [userTransaction],
                 limit: 10,
                 offset: 0,
+            });
+        });
+
+        describe('filters', () => {
+            it.for(['I', 'E'] as const satisfies readonly EntryType[])(
+                'respects the type %s filter',
+                async (type: EntryType) => {
+                    const income = await createPlannedTransaction(
+                        db,
+                        user.id,
+                        account.id,
+                        (await createCategory(db, user.id, 'I')).id,
+                        'I',
+                    );
+
+                    const expense = await createPlannedTransaction(
+                        db,
+                        user.id,
+                        account.id,
+                        (await createCategory(db, user.id, 'E')).id,
+                        'E',
+                    );
+
+                    await expect(
+                        service.findAll(user.id, {
+                            dateField: 'dueDate',
+                            limit: 10,
+                            offset: 0,
+                            type,
+                        }),
+                    ).resolves.toEqual({
+                        total: 1,
+                        limit: 10,
+                        offset: 0,
+                        items: [type === 'I' ? income : expense],
+                    });
+                },
+            );
+
+            it.for([
+                'P',
+                'X',
+                'C',
+            ] as const satisfies readonly TransactionStatus[])(
+                'respects the status %s filter',
+                async (status) => {
+                    const planned = await createPlannedTransaction(
+                        db,
+                        user.id,
+                        account.id,
+                        category.id,
+                        'E',
+                    );
+
+                    const canceled = await createCanceledTransaction(
+                        db,
+                        user.id,
+                        account.id,
+                        category.id,
+                        'E',
+                    );
+
+                    const realized = await createRealizedTransaction(
+                        db,
+                        user.id,
+                        account.id,
+                        category.id,
+                        'E',
+                    );
+
+                    await expect(
+                        service.findAll(user.id, {
+                            dateField: 'dueDate',
+                            limit: 10,
+                            offset: 0,
+                            status,
+                        }),
+                    ).resolves.toEqual({
+                        total: 1,
+                        limit: 10,
+                        offset: 0,
+                        items: [
+                            status === 'P'
+                                ? planned
+                                : status === 'X'
+                                  ? canceled
+                                  : realized,
+                        ],
+                    });
+                },
+            );
+
+            it('respects the from date filter', async () => {
+                // before
+                await createPlannedTransaction(
+                    db,
+                    user.id,
+                    account.id,
+                    category.id,
+                    'E',
+                    1_00,
+                    '2026-12-09',
+                );
+
+                const boundary = await createPlannedTransaction(
+                    db,
+                    user.id,
+                    account.id,
+                    category.id,
+                    'E',
+                    1_00,
+                    '2026-12-10',
+                );
+
+                const after = await createPlannedTransaction(
+                    db,
+                    user.id,
+                    account.id,
+                    category.id,
+                    'E',
+                    1_00,
+                    '2026-12-11',
+                );
+
+                await expect(
+                    service.findAll(user.id, {
+                        dateField: 'dueDate',
+                        limit: 10,
+                        offset: 0,
+                        from: '2026-12-10',
+                    }),
+                ).resolves.toEqual({
+                    total: 2,
+                    limit: 10,
+                    offset: 0,
+                    items: [boundary, after],
+                });
+            });
+
+            it('respects the to date filter', async () => {
+                const before = await createPlannedTransaction(
+                    db,
+                    user.id,
+                    account.id,
+                    category.id,
+                    'E',
+                    1_00,
+                    '2026-12-09',
+                );
+
+                const boundary = await createPlannedTransaction(
+                    db,
+                    user.id,
+                    account.id,
+                    category.id,
+                    'E',
+                    1_00,
+                    '2026-12-10',
+                );
+
+                // after
+                await createPlannedTransaction(
+                    db,
+                    user.id,
+                    account.id,
+                    category.id,
+                    'E',
+                    1_00,
+                    '2026-12-11',
+                );
+
+                await expect(
+                    service.findAll(user.id, {
+                        dateField: 'dueDate',
+                        limit: 10,
+                        offset: 0,
+                        to: '2026-12-10',
+                    }),
+                ).resolves.toEqual({
+                    total: 2,
+                    limit: 10,
+                    offset: 0,
+                    items: [before, boundary],
+                });
+            });
+
+            it('respects the accountId filter', async () => {
+                await createRealizedTransaction(
+                    db,
+                    user.id,
+                    // A second account
+                    (await createAccount(db, user.id)).id,
+                    category.id,
+                    'E',
+                );
+
+                const transaction = await createPlannedTransaction(
+                    db,
+                    user.id,
+                    account.id,
+                    category.id,
+                    'E',
+                );
+
+                await expect(
+                    service.findAll(user.id, {
+                        dateField: 'dueDate',
+                        limit: 10,
+                        offset: 0,
+                        accountId: account.id,
+                    }),
+                ).resolves.toEqual({
+                    total: 1,
+                    limit: 10,
+                    offset: 0,
+                    items: [transaction],
+                });
+            });
+
+            it('respects the categoryId filter', async () => {
+                await createCanceledTransaction(
+                    db,
+                    user.id,
+                    account.id,
+                    // A second category
+                    (await createCategory(db, user.id, 'I')).id,
+                    'I',
+                );
+
+                const transaction = await createPlannedTransaction(
+                    db,
+                    user.id,
+                    account.id,
+                    category.id,
+                    'E',
+                );
+
+                await expect(
+                    service.findAll(user.id, {
+                        dateField: 'dueDate',
+                        limit: 10,
+                        offset: 0,
+                        categoryId: category.id,
+                    }),
+                ).resolves.toEqual({
+                    total: 1,
+                    limit: 10,
+                    offset: 0,
+                    items: [transaction],
+                });
+            });
+
+            it.for([
+                'dueDate',
+                'transactionDate',
+                'accountingMonth',
+            ] as const satisfies readonly TransactionDateField[])(
+                'filters by the selected date field (%s)',
+                async (dateField) => {
+                    const dueDate = await createPlannedTransaction(
+                        db,
+                        user.id,
+                        account.id,
+                        category.id,
+                        'E',
+                        10_00,
+                        '2026-11-04',
+                    );
+
+                    const transactionDate = await createRealizedTransaction(
+                        db,
+                        user.id,
+                        account.id,
+                        category.id,
+                        'E',
+                        1_00,
+                        1_00,
+                        '2026-11-05',
+                        '2026-11-04',
+                    );
+
+                    const expectedItems =
+                        dateField === 'dueDate'
+                            ? [dueDate, transactionDate]
+                            : dateField === 'transactionDate'
+                              ? [transactionDate]
+                              : [];
+
+                    await expect(
+                        service.findAll(user.id, {
+                            dateField,
+                            limit: 10,
+                            offset: 0,
+                            from: '2026-11-04',
+                        }),
+                    ).resolves.toEqual({
+                        total: expectedItems.length,
+                        limit: 10,
+                        offset: 0,
+                        items: expectedItems,
+                    });
+                },
+            );
+
+            it('combines filters cumulatively', async () => {
+                const matching = await createPlannedTransaction(
+                    db,
+                    user.id,
+                    account.id,
+                    category.id,
+                    'E',
+                );
+
+                await createPlannedTransaction(
+                    db,
+                    user.id,
+                    account.id,
+                    (await createCategory(db, user.id, 'I')).id,
+                    'I',
+                );
+
+                await createCanceledTransaction(
+                    db,
+                    user.id,
+                    account.id,
+                    category.id,
+                    'E',
+                );
+
+                await expect(
+                    service.findAll(user.id, {
+                        dateField: 'dueDate',
+                        limit: 10,
+                        offset: 0,
+                        type: 'E',
+                        status: 'P',
+                    }),
+                ).resolves.toEqual({
+                    total: 1,
+                    limit: 10,
+                    offset: 0,
+                    items: [matching],
+                });
             });
         });
     });
