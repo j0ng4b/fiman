@@ -53,7 +53,7 @@ async function findTransaction(
     return transaction;
 }
 
-describe('TransactionService', () => {
+describe('TransactionsService', () => {
     let db: Database;
     let pool: Pool;
     let service: TransactionsService;
@@ -607,60 +607,85 @@ describe('TransactionService', () => {
             });
         });
 
-        it('returns a page of transactions', async () => {
-            const third = await createPlannedTransaction(
-                db,
-                user.id,
-                account.id,
-                category.id,
-                'E',
-                1_00,
-                '2026-12-11',
-            );
+        describe('page', () => {
+            it('returns a page of transactions', async () => {
+                const third = await createPlannedTransaction(
+                    db,
+                    user.id,
+                    account.id,
+                    category.id,
+                    'E',
+                    1_00,
+                    '2026-12-11',
+                );
 
-            // first
-            await createPlannedTransaction(
-                db,
-                user.id,
-                account.id,
-                category.id,
-                'E',
-                1_00,
-                '2026-12-09',
-            );
+                // first
+                await createPlannedTransaction(
+                    db,
+                    user.id,
+                    account.id,
+                    category.id,
+                    'E',
+                    1_00,
+                    '2026-12-09',
+                );
 
-            // fourth
-            await createPlannedTransaction(
-                db,
-                user.id,
-                account.id,
-                category.id,
-                'E',
-                1_00,
-                '2026-12-12',
-            );
+                // fourth
+                await createPlannedTransaction(
+                    db,
+                    user.id,
+                    account.id,
+                    category.id,
+                    'E',
+                    1_00,
+                    '2026-12-12',
+                );
 
-            const second = await createPlannedTransaction(
-                db,
-                user.id,
-                account.id,
-                category.id,
-                'E',
-                1_00,
-                '2026-12-10',
-            );
+                const second = await createPlannedTransaction(
+                    db,
+                    user.id,
+                    account.id,
+                    category.id,
+                    'E',
+                    1_00,
+                    '2026-12-10',
+                );
 
-            await expect(
-                service.findAll(user.id, {
-                    dateField: 'dueDate',
+                await expect(
+                    service.findAll(user.id, {
+                        dateField: 'dueDate',
+                        limit: 2,
+                        offset: 1,
+                    }),
+                ).resolves.toEqual({
+                    total: 4,
                     limit: 2,
                     offset: 1,
-                }),
-            ).resolves.toEqual({
-                total: 4,
-                limit: 2,
-                offset: 1,
-                items: [second, third],
+                    items: [second, third],
+                });
+            });
+
+            it('returns an empty page when offset exceeds the total', async () => {
+                await createPlannedTransaction(
+                    db,
+                    user.id,
+                    account.id,
+                    category.id,
+                    'E',
+                );
+
+                await expect(
+                    service.findAll(user.id, {
+                        dateField: 'dueDate',
+                        limit: 10,
+                        offset: 5,
+                    }),
+                ).resolves.toEqual({
+                    total: 1,
+                    limit: 10,
+                    offset: 5,
+                    items: [],
+                });
             });
         });
     });
