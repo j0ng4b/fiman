@@ -1,4 +1,5 @@
 import type { Pool } from 'pg';
+import { eq } from 'drizzle-orm';
 import { inject } from 'vitest';
 
 import type { Account } from '../../src/accounts/accounts.schema.ts';
@@ -12,6 +13,7 @@ import type {
 import type { Transaction } from '../../src/transactions/transactions.schema.ts';
 import type { User } from '../../src/users/users.schema.ts';
 import { TransactionNotFoundError } from '../../src/transactions/transactions.exceptions.ts';
+import { transactionsTable } from '../../src/transactions/transactions.schema.ts';
 import { TransactionsService } from '../../src/transactions/transactions.service.ts';
 
 import { createTestDatabase, resetDatabase } from './helpers/database.ts';
@@ -23,6 +25,18 @@ import {
     createRealizedTransaction,
     createUser,
 } from './helpers/factories.ts';
+
+async function findTransaction(
+    db: Database,
+    id: number,
+): Promise<Transaction | undefined> {
+    const [transaction] = await db
+        .select()
+        .from(transactionsTable)
+        .where(eq(transactionsTable.id, id));
+
+    return transaction;
+}
 
 describe('TransactionService', () => {
     let db: Database;
@@ -636,7 +650,62 @@ describe('TransactionService', () => {
         });
     });
 
-    describe('create', () => {});
+    describe('create', () => {
+        let user: User;
+        let incomeCategory: Category;
+        let expenseCategory: Category;
+        let account: Account;
+
+        beforeEach(async () => {
+            user = await createUser(db);
+            incomeCategory = await createCategory(db, user.id, 'I');
+            expenseCategory = await createCategory(db, user.id, 'E');
+            account = await createAccount(db, user.id);
+        });
+
+        it('creates a planned transaction', async () => {});
+
+        it('creates a realized transaction', async () => {});
+
+        describe('defaults', () => {
+            it('defaults accountingMonth to the first day of dueDate month when omitted', async () => {});
+
+            it('defaults dueDate to transactionDate when omitted', async () => {});
+
+            it('defaults transactionDate to today when omitted', async () => {});
+
+            it.for(['I', 'E'] as const satisfies readonly EntryType[])(
+                'uses the default category for the transaction type (%s)',
+                async (type) => {},
+            );
+        });
+
+        describe('rules', () => {
+            it('rejects a transaction with a future transaction date', async () => {});
+
+            it('rejects a transaction with an accounting month after its due date month', async () => {});
+
+            it('rejects a transaction when the account does not exist', async () => {});
+
+            it('rejects a transaction when the account belongs to another user', async () => {});
+
+            it('rejects a transaction using an inactive account', async () => {});
+
+            it('rejects a transaction when the category does not exist', async () => {});
+
+            it('rejects a transaction when the category belongs to another user', async () => {});
+
+            it('rejects a transaction using an inactive category', async () => {});
+
+            it('rejects a transaction with an accounting month before the account start date', async () => {});
+
+            it('rejects a planned transaction with a due date before the account start date', async () => {});
+
+            it('rejects a realized transaction dated before the account start date', async () => {});
+
+            it('rejects a transaction when the category type does not match the transaction type', async () => {});
+        });
+    });
 
     describe('update', () => {});
 
