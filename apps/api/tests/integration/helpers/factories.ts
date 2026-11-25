@@ -39,11 +39,12 @@ export async function createCategory(
     type: EntryType,
     name: string = uniqueName('TestCategory'),
     isSystem: boolean = false,
+    active: boolean = true,
 ): Promise<Category> {
     return first(
         await db
             .insert(categoriesTable)
-            .values({ userId, type, name, isSystem })
+            .values({ userId, type, name, isSystem, active })
             .returning(),
     );
 }
@@ -54,11 +55,12 @@ export async function createAccount(
     name: string = uniqueName('TestAccount'),
     initialBalance: number = 100,
     startDate: IsoDate = '2020-01-01',
+    active: boolean = true,
 ): Promise<Account> {
     return first(
         await db
             .insert(accountsTable)
-            .values({ userId, name, initialBalance, startDate })
+            .values({ userId, name, initialBalance, startDate, active })
             .returning(),
     );
 }

@@ -12,8 +12,22 @@ import type {
 } from '../../src/transactions/transactions.dto.ts';
 import type { Transaction } from '../../src/transactions/transactions.schema.ts';
 import type { User } from '../../src/users/users.schema.ts';
+import {
+    AccountInactiveError,
+    AccountNotFoundError,
+} from '../../src/accounts/accounts.exceptions.ts';
+import {
+    CategoryInactiveError,
+    CategoryNotFoundError,
+} from '../../src/categories/categories.exceptions.ts';
 import { today, tomorrow } from '../../src/common/dates.ts';
-import { TransactionNotFoundError } from '../../src/transactions/transactions.exceptions.ts';
+import {
+    TransactionAccountingMonthAfterDueDateError,
+    TransactionBeforeAccountStartError,
+    TransactionCategoryTypeMismatchError,
+    TransactionDateInFutureError,
+    TransactionNotFoundError,
+} from '../../src/transactions/transactions.exceptions.ts';
 import { transactionsTable } from '../../src/transactions/transactions.schema.ts';
 import { TransactionsService } from '../../src/transactions/transactions.service.ts';
 
@@ -805,37 +819,226 @@ describe('TransactionService', () => {
         });
 
         describe('rules', () => {
-            it('rejects a transaction with a future transaction date', async () => {});
+            it('rejects a transaction with a future transaction date', async () => {
+                await expect(
+                    service.create(user.id, {
+                        type: 'I',
+                        status: 'C',
+                        paidAmount: 1_00,
+                        transactionDate: tomorrow(),
+                        description: 'Testing rules',
+                        accountId: account.id,
+                        categoryId: incomeCategory.id,
+                    }),
+                ).rejects.toThrow(TransactionDateInFutureError);
+            });
 
-            it('rejects a transaction with an accounting month after its due date month', async () => {});
+            it('rejects a transaction with an accounting month after its due date month', async () => {
+                await expect(
+                    service.create(user.id, {
+                        type: 'E',
+                        status: 'P',
+                        amount: 1_00,
+                        dueDate: '2023-01-05',
+                        description: 'Testing rules',
+                        accountingMonth: '2026-02-01',
+                        accountId: account.id,
+                        categoryId: expenseCategory.id,
+                    }),
+                ).rejects.toThrow(TransactionAccountingMonthAfterDueDateError);
+            });
 
-            it('rejects a transaction when the account does not exist', async () => {});
+            it('rejects a transaction when the account does not exist', async () => {
+                await expect(
+                    service.create(user.id, {
+                        type: 'I',
+                        status: 'C',
+                        paidAmount: 1_00,
+                        description: 'Testing rules',
+                        accountId: 99,
+                        categoryId: incomeCategory.id,
+                    }),
+                ).rejects.toThrow(AccountNotFoundError);
+            });
 
-            it('rejects a transaction when the account belongs to another user', async () => {});
+            it('rejects a transaction when the account belongs to another user', async () => {
+                const other = await createUser(db);
+                const otherAccount = await createAccount(db, other.id);
 
-            it('rejects a transaction using an inactive account', async () => {});
+                await expect(
+                    service.create(user.id, {
+                        type: 'I',
+                        status: 'C',
+                        paidAmount: 1_00,
+                        description: 'Testing rules',
+                        accountId: otherAccount.id,
+                        categoryId: incomeCategory.id,
+                    }),
+                ).rejects.toThrow(AccountNotFoundError);
+            });
 
-            it('rejects a transaction when the category does not exist', async () => {});
+            it('rejects a transaction using an inactive account', async () => {
+                const inactiveAccount = await createAccount(
+                    db,
+                    user.id,
+                    'Inactive account',
+                    0,
+                    '2000-01-01',
+                    false,
+                );
 
-            it('rejects a transaction when the category belongs to another user', async () => {});
+                await expect(
+                    service.create(user.id, {
+                        type: 'I',
+                        status: 'C',
+                        paidAmount: 1_00,
+                        description: 'Testing rules',
+                        accountId: inactiveAccount.id,
+                        categoryId: incomeCategory.id,
+                    }),
+                ).rejects.toThrow(AccountInactiveError);
+            });
 
-            it('rejects a transaction using an inactive category', async () => {});
+            it('rejects a transaction when the category does not exist', async () => {
+                await expect(
+                    service.create(user.id, {
+                        type: 'I',
+                        status: 'C',
+                        paidAmount: 1_00,
+                        description: 'Testing rules',
+                        accountId: account.id,
+                        categoryId: 99,
+                    }),
+                ).rejects.toThrow(CategoryNotFoundError);
+            });
 
-            it('rejects a transaction with an accounting month before the account start date', async () => {});
+            it('rejects a transaction when the category belongs to another user', async () => {
+                const other = await createUser(db);
+                const otherCategory = await createCategory(db, other.id, 'I');
 
-            it('rejects a planned transaction with a due date before the account start date', async () => {});
+                await expect(
+                    service.create(user.id, {
+                        type: 'I',
+                        status: 'C',
+                        paidAmount: 1_00,
+                        description: 'Testing rules',
+                        accountId: account.id,
+                        categoryId: otherCategory.id,
+                    }),
+                ).rejects.toThrow(CategoryNotFoundError);
+            });
 
-            it('rejects a realized transaction dated before the account start date', async () => {});
+            it('rejects a transaction using an inactive category', async () => {
+                const inactiveCategory = await createCategory(
+                    db,
+                    user.id,
+                    'E',
+                    'Inactive category',
+                    false,
+                    false,
+                );
 
-            it('rejects a transaction when the category type does not match the transaction type', async () => {});
+                await expect(
+                    service.create(user.id, {
+                        type: 'E',
+                        status: 'P',
+                        amount: 1_00,
+                        dueDate: '2024-07-20',
+                        description: 'Testing rules',
+                        accountId: account.id,
+                        categoryId: inactiveCategory.id,
+                    }),
+                ).rejects.toThrow(CategoryInactiveError);
+            });
+
+            it('rejects a transaction with an accounting month before the account start date', async () => {
+                const date = today();
+                const todayAccount = await createAccount(
+                    db,
+                    user.id,
+                    'Today account',
+                    0,
+                    date,
+                );
+
+                await expect(
+                    service.create(user.id, {
+                        type: 'E',
+                        status: 'P',
+                        amount: 1_00,
+                        dueDate: date,
+                        description: 'Testing rules',
+                        accountingMonth: '2000-01-01',
+                        accountId: todayAccount.id,
+                        categoryId: expenseCategory.id,
+                    }),
+                ).rejects.toThrow(TransactionBeforeAccountStartError);
+            });
+
+            it('rejects a planned transaction with a due date before the account start date', async () => {
+                const todayAccount = await createAccount(
+                    db,
+                    user.id,
+                    'Today account',
+                    0,
+                    today(),
+                );
+
+                await expect(
+                    service.create(user.id, {
+                        type: 'E',
+                        status: 'P',
+                        amount: 1_00,
+                        dueDate: '2000-01-01',
+                        description: 'Testing rules',
+                        accountId: todayAccount.id,
+                        categoryId: expenseCategory.id,
+                    }),
+                ).rejects.toThrow(TransactionBeforeAccountStartError);
+            });
+
+            it('rejects a realized transaction dated before the account start date', async () => {
+                const todayAccount = await createAccount(
+                    db,
+                    user.id,
+                    'Today account',
+                    0,
+                    today(),
+                );
+
+                await expect(
+                    service.create(user.id, {
+                        type: 'I',
+                        status: 'C',
+                        paidAmount: 1_00,
+                        transactionDate: '2000-01-01',
+                        description: 'Testing rules',
+                        accountId: todayAccount.id,
+                        categoryId: incomeCategory.id,
+                    }),
+                ).rejects.toThrow(TransactionBeforeAccountStartError);
+            });
+
+            it('rejects a transaction when the category type does not match the transaction type', async () => {
+                await expect(
+                    service.create(user.id, {
+                        type: 'I',
+                        status: 'C',
+                        paidAmount: 1_00,
+                        description: 'Testing rules',
+                        accountId: account.id,
+                        categoryId: expenseCategory.id,
+                    }),
+                ).rejects.toThrow(TransactionCategoryTypeMismatchError);
+            });
         });
     });
 
-    describe('update', () => {});
+    describe.todo('update', () => {});
 
-    describe('realize', () => {});
+    describe.todo('realize', () => {});
 
-    describe('cancel', () => {});
+    describe.todo('cancel', () => {});
 
-    describe('reverse', () => {});
+    describe.todo('reverse', () => {});
 });
