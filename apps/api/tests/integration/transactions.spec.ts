@@ -12,7 +12,7 @@ import type {
 } from '../../src/transactions/transactions.dto.ts';
 import type { Transaction } from '../../src/transactions/transactions.schema.ts';
 import type { User } from '../../src/users/users.schema.ts';
-import { tomorrow } from '../../src/common/dates.ts';
+import { today, tomorrow } from '../../src/common/dates.ts';
 import { TransactionNotFoundError } from '../../src/transactions/transactions.exceptions.ts';
 import { transactionsTable } from '../../src/transactions/transactions.schema.ts';
 import { TransactionsService } from '../../src/transactions/transactions.service.ts';
@@ -728,15 +728,79 @@ describe('TransactionService', () => {
         });
 
         describe('defaults', () => {
-            it('defaults accountingMonth to the first day of dueDate month when omitted', async () => {});
+            it('defaults accountingMonth to the first day of dueDate month when omitted', async () => {
+                await expect(
+                    service.create(user.id, {
+                        type: 'I',
+                        status: 'P',
+                        amount: 50_00,
+                        dueDate: '2025-06-28',
+                        description: 'Found behind the sofa',
+                        accountId: account.id,
+                        categoryId: incomeCategory.id,
+                    }),
+                ).resolves.toMatchObject({
+                    accountingMonth: '2025-06-01',
+                });
+            });
 
-            it('defaults dueDate to transactionDate when omitted', async () => {});
+            it('uses transactionDate as dueDate for realized transactions', async () => {
+                await expect(
+                    service.create(user.id, {
+                        type: 'E',
+                        status: 'C',
+                        paidAmount: 10_00,
+                        transactionDate: '2026-09-30',
+                        description: 'Ticket star park',
+                        accountId: account.id,
+                        categoryId: expenseCategory.id,
+                    }),
+                ).resolves.toMatchObject({
+                    dueDate: '2026-09-30',
+                });
+            });
 
-            it('defaults transactionDate to today when omitted', async () => {});
+            it('defaults transactionDate to today when omitted', async () => {
+                const date = today();
+                await expect(
+                    service.create(user.id, {
+                        type: 'E',
+                        status: 'C',
+                        paidAmount: 99_00,
+                        description: 'Grand shiT Agame 6',
+                        accountId: account.id,
+                        categoryId: expenseCategory.id,
+                    }),
+                ).resolves.toMatchObject({
+                    transactionDate: date,
+                    dueDate: date,
+                });
+            });
 
             it.for(['I', 'E'] as const satisfies readonly EntryType[])(
                 'uses the default category for the transaction type (%s)',
-                async (type) => {},
+                async (type) => {
+                    const defaultCategory = await createCategory(
+                        db,
+                        user.id,
+                        type,
+                        `Default ${type} category`,
+                        true,
+                    );
+
+                    await expect(
+                        service.create(user.id, {
+                            type,
+                            status: 'P',
+                            amount: 50_00,
+                            dueDate: '2025-06-28',
+                            description: 'Found behind the sofa',
+                            accountId: account.id,
+                        }),
+                    ).resolves.toMatchObject({
+                        categoryId: defaultCategory.id,
+                    });
+                },
             );
         });
 
