@@ -1056,6 +1056,71 @@ describe('TransactionsService', () => {
                     }),
                 ).rejects.toThrow(TransactionCategoryTypeMismatchError);
             });
+
+            it('accepts a realized transaction dated today', async () => {
+                const date = today();
+
+                await expect(
+                    service.create(user.id, {
+                        type: 'I',
+                        status: 'C',
+                        paidAmount: 1_00,
+                        transactionDate: date,
+                        description: 'Testing rules',
+                        accountId: account.id,
+                        categoryId: incomeCategory.id,
+                    }),
+                ).resolves.toMatchObject({
+                    transactionDate: date,
+                    dueDate: date,
+                });
+            });
+
+            describe('account start date boundaries', () => {
+                it('accepts a due date equal to the account start date', async () => {
+                    const startAccount = await createAccount(
+                        db,
+                        user.id,
+                        'Start account',
+                        0,
+                        '2026-11-15',
+                    );
+
+                    await expect(
+                        service.create(user.id, {
+                            type: 'E',
+                            status: 'P',
+                            amount: 1_00,
+                            dueDate: '2026-11-15',
+                            description: 'Testing rules',
+                            accountId: startAccount.id,
+                            categoryId: expenseCategory.id,
+                        }),
+                    ).resolves.toMatchObject({ dueDate: '2026-11-15' });
+                });
+
+                it('accepts a default accounting month earlier than the start date but within its month', async () => {
+                    const startAccount = await createAccount(
+                        db,
+                        user.id,
+                        'Mid-month account',
+                        0,
+                        '2026-11-15',
+                    );
+
+                    await expect(
+                        service.create(user.id, {
+                            type: 'E',
+                            status: 'P',
+                            amount: 1_00,
+                            dueDate: '2026-11-20',
+                            description: 'Testing rules',
+                            accountId: startAccount.id,
+                            categoryId: expenseCategory.id,
+                        }),
+                    ).resolves.toMatchObject({ accountingMonth: '2026-11-01' });
+                });
+            });
         });
     });
 
