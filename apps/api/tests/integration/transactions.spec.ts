@@ -12,6 +12,7 @@ import type {
 } from '../../src/transactions/transactions.dto.ts';
 import type { Transaction } from '../../src/transactions/transactions.schema.ts';
 import type { User } from '../../src/users/users.schema.ts';
+import { tomorrow } from '../../src/common/dates.ts';
 import { TransactionNotFoundError } from '../../src/transactions/transactions.exceptions.ts';
 import { transactionsTable } from '../../src/transactions/transactions.schema.ts';
 import { TransactionsService } from '../../src/transactions/transactions.service.ts';
@@ -663,9 +664,68 @@ describe('TransactionService', () => {
             account = await createAccount(db, user.id);
         });
 
-        it('creates a planned transaction', async () => {});
+        it('creates a planned transaction', async () => {
+            const nextDate = tomorrow();
+            const created = await service.create(user.id, {
+                type: 'E',
+                status: 'P',
+                amount: 155_00,
+                dueDate: nextDate,
+                description: 'Dinner',
+                accountId: account.id,
+                categoryId: expenseCategory.id,
+            });
 
-        it('creates a realized transaction', async () => {});
+            expect(created).toMatchObject({
+                userId: user.id,
+
+                type: 'E',
+                status: 'P',
+                amount: 155_00,
+                dueDate: nextDate,
+                description: 'Dinner',
+                accountId: account.id,
+                categoryId: expenseCategory.id,
+
+                paidAmount: null,
+                transactionDate: null,
+            });
+
+            await expect(findTransaction(db, created.id)).resolves.toEqual(
+                created,
+            );
+        });
+
+        it('creates a realized transaction', async () => {
+            const created = await service.create(user.id, {
+                type: 'I',
+                status: 'C',
+                paidAmount: 1000_00,
+                transactionDate: '2026-11-11',
+                description: 'Salary',
+                accountId: account.id,
+                categoryId: incomeCategory.id,
+            });
+
+            expect(created).toMatchObject({
+                userId: user.id,
+
+                type: 'I',
+                status: 'C',
+                paidAmount: 1000_00,
+                transactionDate: '2026-11-11',
+                description: 'Salary',
+                accountId: account.id,
+                categoryId: incomeCategory.id,
+
+                amount: 1000_00,
+                dueDate: '2026-11-11',
+            });
+
+            await expect(findTransaction(db, created.id)).resolves.toEqual(
+                created,
+            );
+        });
 
         describe('defaults', () => {
             it('defaults accountingMonth to the first day of dueDate month when omitted', async () => {});
