@@ -525,6 +525,115 @@ describe('TransactionService', () => {
                 });
             });
         });
+
+        it('orders transactions by date and then by ID', async () => {
+            const later = await createPlannedTransaction(
+                db,
+                user.id,
+                account.id,
+                category.id,
+                'E',
+                1_00,
+                '2026-12-11',
+            );
+
+            const firstOnDate = await createPlannedTransaction(
+                db,
+                user.id,
+                account.id,
+                category.id,
+                'E',
+                1_00,
+                '2026-12-09',
+            );
+
+            const secondOnDate = await createPlannedTransaction(
+                db,
+                user.id,
+                account.id,
+                category.id,
+                'E',
+                1_00,
+                '2026-12-09',
+            );
+
+            const middle = await createPlannedTransaction(
+                db,
+                user.id,
+                account.id,
+                category.id,
+                'E',
+                1_00,
+                '2026-12-10',
+            );
+
+            await expect(
+                service.findAll(user.id, {
+                    dateField: 'dueDate',
+                    limit: 10,
+                    offset: 0,
+                }),
+            ).resolves.toMatchObject({
+                items: [firstOnDate, secondOnDate, middle, later],
+            });
+        });
+
+        it('returns a page of transactions', async () => {
+            const third = await createPlannedTransaction(
+                db,
+                user.id,
+                account.id,
+                category.id,
+                'E',
+                1_00,
+                '2026-12-11',
+            );
+
+            // first
+            await createPlannedTransaction(
+                db,
+                user.id,
+                account.id,
+                category.id,
+                'E',
+                1_00,
+                '2026-12-09',
+            );
+
+            // fourth
+            await createPlannedTransaction(
+                db,
+                user.id,
+                account.id,
+                category.id,
+                'E',
+                1_00,
+                '2026-12-12',
+            );
+
+            const second = await createPlannedTransaction(
+                db,
+                user.id,
+                account.id,
+                category.id,
+                'E',
+                1_00,
+                '2026-12-10',
+            );
+
+            await expect(
+                service.findAll(user.id, {
+                    dateField: 'dueDate',
+                    limit: 2,
+                    offset: 1,
+                }),
+            ).resolves.toEqual({
+                total: 4,
+                limit: 2,
+                offset: 1,
+                items: [second, third],
+            });
+        });
     });
 
     describe('create', () => {});
