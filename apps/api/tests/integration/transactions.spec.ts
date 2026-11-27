@@ -1606,7 +1606,7 @@ describe('TransactionsService', () => {
                           );
 
                 await expect(
-                    await service.cancel(user.id, transaction.id),
+                    service.cancel(user.id, transaction.id),
                 ).rejects.toThrow(TransactionNotPlannedError);
 
                 await expect(
