@@ -1452,13 +1452,69 @@ describe('TransactionsService', () => {
             });
 
             describe('category', () => {
-                it('rejects categories that does not exist', async () => {});
+                it('rejects categories that does not exist', async () => {
+                    await expect(
+                        service.update(user.id, transactions.realized.id, {
+                            categoryId: -1,
+                        }),
+                    ).rejects.toThrow(CategoryNotFoundError);
 
-                it('rejects categories that belongs to another user', async () => {});
+                    await expect(
+                        findTransaction(db, transactions.realized.id),
+                    ).resolves.toEqual(transactions.realized);
+                });
 
-                it('rejects inactive categories', async () => {});
+                it('rejects categories that belongs to another user', async () => {
+                    const otherUser = await createUser(db);
+                    const otherCategory = await createCategory(
+                        db,
+                        otherUser.id,
+                        'I',
+                    );
 
-                it('rejects a category type that does not match the transaction type', async () => {});
+                    await expect(
+                        service.update(user.id, transactions.planned.id, {
+                            categoryId: otherCategory.id,
+                        }),
+                    ).rejects.toThrow(CategoryNotFoundError);
+
+                    await expect(
+                        findTransaction(db, transactions.planned.id),
+                    ).resolves.toEqual(transactions.planned);
+                });
+
+                it('rejects inactive categories', async () => {
+                    const inactiveCategory = await createCategory(
+                        db,
+                        user.id,
+                        'E',
+                        'Inactive category',
+                        false,
+                        false,
+                    );
+
+                    await expect(
+                        service.update(user.id, transactions.realized.id, {
+                            categoryId: inactiveCategory.id,
+                        }),
+                    ).rejects.toThrow(CategoryInactiveError);
+
+                    await expect(
+                        findTransaction(db, transactions.realized.id),
+                    ).resolves.toEqual(transactions.realized);
+                });
+
+                it('rejects a category type that does not match the transaction type', async () => {
+                    await expect(
+                        service.update(user.id, transactions.planned.id, {
+                            categoryId: expenseCategory.id,
+                        }),
+                    ).rejects.toThrow(TransactionCategoryTypeMismatchError);
+
+                    await expect(
+                        findTransaction(db, transactions.planned.id),
+                    ).resolves.toEqual(transactions.planned);
+                });
 
                 it('accepts keeping the current category even if it became inactive', async () => {
                     await db
