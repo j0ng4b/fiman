@@ -39,11 +39,12 @@ export async function createCategory(
     type: EntryType,
     name: string = uniqueName('TestCategory'),
     isSystem: boolean = false,
+    active: boolean = true,
 ): Promise<Category> {
     return first(
         await db
             .insert(categoriesTable)
-            .values({ userId, type, name, isSystem })
+            .values({ userId, type, name, isSystem, active })
             .returning(),
     );
 }
@@ -54,11 +55,12 @@ export async function createAccount(
     name: string = uniqueName('TestAccount'),
     initialBalance: number = 100,
     startDate: IsoDate = '2020-01-01',
+    active: boolean = true,
 ): Promise<Account> {
     return first(
         await db
             .insert(accountsTable)
-            .values({ userId, name, initialBalance, startDate })
+            .values({ userId, name, initialBalance, startDate, active })
             .returning(),
     );
 }
@@ -72,6 +74,7 @@ export async function createPlannedTransaction(
     amount: number = 10000,
     dueDate: IsoDate = tomorrow(),
     description: string = 'TestPlannedTransaction',
+    accountingMonth: IsoDate = firstOfMonth(dueDate),
 ): Promise<Transaction> {
     return first(
         await db
@@ -85,7 +88,32 @@ export async function createPlannedTransaction(
                 description,
                 dueDate,
                 amount,
-                accountingMonth: firstOfMonth(dueDate),
+                accountingMonth,
+            })
+            .returning(),
+    );
+}
+
+export async function createCanceledTransaction(
+    db: Database,
+    userId: number,
+    accountId: number,
+    categoryId: number,
+    type: EntryType,
+): Promise<Transaction> {
+    return first(
+        await db
+            .insert(transactionsTable)
+            .values({
+                type,
+                status: 'X',
+                userId,
+                accountId,
+                categoryId,
+                description: 'TestCanceledTransaction',
+                dueDate: tomorrow(),
+                amount: 1000_00,
+                accountingMonth: firstOfMonth(tomorrow()),
             })
             .returning(),
     );
