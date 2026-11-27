@@ -3,6 +3,7 @@ import { eq } from 'drizzle-orm';
 import { inject } from 'vitest';
 
 import type { Account } from '../../src/accounts/accounts.schema.ts';
+import type { Category } from '../../src/categories/categories.schema.ts';
 import type { EntryType } from '../../src/common/dto.ts';
 import type { Database } from '../../src/database/database.types.ts';
 import type {
@@ -20,10 +21,7 @@ import {
     CategoryInactiveError,
     CategoryNotFoundError,
 } from '../../src/categories/categories.exceptions.ts';
-import {
-    categoriesTable,
-    type Category,
-} from '../../src/categories/categories.schema.ts';
+import { categoriesTable } from '../../src/categories/categories.schema.ts';
 import { today, tomorrow } from '../../src/common/dates.ts';
 import {
     TransactionAccountingMonthAfterDueDateError,
@@ -33,6 +31,7 @@ import {
     TransactionFieldsImmutableError,
     TransactionNotEditableError,
     TransactionNotFoundError,
+    TransactionNotPlannedError,
 } from '../../src/transactions/transactions.exceptions.ts';
 import { transactionsTable } from '../../src/transactions/transactions.schema.ts';
 import { TransactionsService } from '../../src/transactions/transactions.service.ts';
@@ -1413,7 +1412,7 @@ describe('TransactionsService', () => {
                         'accounting month before account start month',
                         { accountingMonth: '2026-11-01' },
                     ],
-                ])('rejects updates with %s', async ([_, data]) => {
+                ])('rejects updates with %s', async ([, data]) => {
                     await expect(
                         service.update(
                             user.id,
@@ -1436,7 +1435,7 @@ describe('TransactionsService', () => {
                         'accounting month equal to account start month',
                         { accountingMonth: '2026-12-01' },
                     ],
-                ])('accepts updates with %s', async ([_, data]) => {
+                ])('accepts updates with %s', async ([, data]) => {
                     await expect(
                         service.update(
                             user.id,
@@ -1535,7 +1534,101 @@ describe('TransactionsService', () => {
 
     describe.todo('realize', () => {});
 
-    describe.todo('cancel', () => {});
+    describe('cancel', () => {
+        let user: User;
+        let category: Category;
+        let account: Account;
+        let planned: Transaction;
+
+        beforeEach(async () => {
+            user = await createUser(db);
+            category = await createCategory(db, user.id, 'E');
+            account = await createAccount(db, user.id);
+            planned = await createPlannedTransaction(
+                db,
+                user.id,
+                account.id,
+                category.id,
+                'E',
+            );
+        });
+
+        it('cancels a planned transaction changing only status and updatedAt', async () => {
+            const canceled = await service.cancel(user.id, planned.id);
+
+            expect(canceled).toEqual({
+                ...planned,
+                status: 'X',
+                updatedAt: canceled.updatedAt,
+            });
+
+            await expect(findTransaction(db, planned.id)).resolves.toEqual(
+                canceled,
+            );
+        });
+
+        it('rejects canceling a transaction that does not exist', async () => {
+            await expect(service.cancel(user.id, -1)).rejects.toThrow(
+                TransactionNotFoundError,
+            );
+        });
+
+        it('rejects canceling a transaction that belongs to another user', async () => {
+            const other = await createUser(db);
+
+            await expect(service.cancel(other.id, planned.id)).rejects.toThrow(
+                TransactionNotFoundError,
+            );
+
+            await expect(findTransaction(db, planned.id)).resolves.toEqual(
+                planned,
+            );
+        });
+
+        it.for(['realized', 'canceled'] as const)(
+            'rejects canceling a %s transaction',
+            async (state) => {
+                const transaction =
+                    state === 'realized'
+                        ? await createRealizedTransaction(
+                              db,
+                              user.id,
+                              account.id,
+                              category.id,
+                              'E',
+                          )
+                        : await createCanceledTransaction(
+                              db,
+                              user.id,
+                              account.id,
+                              category.id,
+                              'E',
+                          );
+
+                await expect(
+                    await service.cancel(user.id, transaction.id),
+                ).rejects.toThrow(TransactionNotPlannedError);
+
+                await expect(
+                    findTransaction(db, transaction.id),
+                ).resolves.toEqual(transaction);
+            },
+        );
+
+        it('lets only one of two concurrent cancels succeed', async () => {
+            const results = await Promise.allSettled([
+                service.cancel(user.id, planned.id),
+                service.cancel(user.id, planned.id),
+            ]);
+
+            expect(
+                results.filter((r) => r.status === 'fulfilled'),
+            ).toHaveLength(1);
+
+            const [rejected] = results.filter((r) => r.status === 'rejected');
+            expect(rejected?.reason).toBeInstanceOf(TransactionNotPlannedError);
+        });
+    });
 
     describe.todo('reverse', () => {});
 });
