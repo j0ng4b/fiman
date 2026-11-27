@@ -74,6 +74,7 @@ export async function createPlannedTransaction(
     amount: number = 10000,
     dueDate: IsoDate = tomorrow(),
     description: string = 'TestPlannedTransaction',
+    accountingMonth: IsoDate = firstOfMonth(dueDate),
 ): Promise<Transaction> {
     return first(
         await db
@@ -87,7 +88,7 @@ export async function createPlannedTransaction(
                 description,
                 dueDate,
                 amount,
-                accountingMonth: firstOfMonth(dueDate),
+                accountingMonth,
             })
             .returning(),
     );

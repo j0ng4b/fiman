@@ -1223,9 +1223,81 @@ describe('TransactionsService', () => {
         });
 
         describe('accounting month', () => {
-            it('updates accountingMonth when dueDate changes and both originally belong to the same month', async () => {});
+            it('updates accountingMonth when dueDate changes and both originally belong to the same month', async () => {
+                await expect(
+                    service.update(user.id, transactions.planned.id, {
+                        dueDate: '2027-01-03',
+                    }),
+                ).resolves.toMatchObject({
+                    accountingMonth: '2027-01-01',
+                });
 
-            it('preserves accountingMonth when dueDate changes and the months already differ', async () => {});
+                await expect(
+                    findTransaction(db, transactions.planned.id),
+                ).resolves.toMatchObject({
+                    accountingMonth: '2027-01-01',
+                });
+            });
+
+            it('preserves accountingMonth when dueDate changes and the months already differ', async () => {
+                const transaction = await createPlannedTransaction(
+                    db,
+                    user.id,
+                    account.id,
+                    incomeCategory.id,
+                    'I',
+                    250_00,
+                    '2026-09-07',
+                    'Testing accounting month',
+                    '2026-08-01',
+                );
+
+                await expect(
+                    service.update(user.id, transaction.id, {
+                        dueDate: '2027-01-10',
+                    }),
+                ).resolves.toMatchObject({
+                    dueDate: '2027-01-10',
+                    accountingMonth: '2026-08-01',
+                });
+
+                await expect(
+                    findTransaction(db, transaction.id),
+                ).resolves.toMatchObject({
+                    dueDate: '2027-01-10',
+                    accountingMonth: '2026-08-01',
+                });
+            });
+
+            it('accepts moving the due date into the month of the preserved accounting month', async () => {
+                const transaction = await createPlannedTransaction(
+                    db,
+                    user.id,
+                    account.id,
+                    incomeCategory.id,
+                    'I',
+                    250_00,
+                    '2026-09-07',
+                    'Testing accounting month',
+                    '2026-08-01',
+                );
+
+                await expect(
+                    service.update(user.id, transaction.id, {
+                        dueDate: '2026-08-20',
+                    }),
+                ).resolves.toMatchObject({
+                    dueDate: '2026-08-20',
+                    accountingMonth: '2026-08-01',
+                });
+
+                await expect(
+                    findTransaction(db, transaction.id),
+                ).resolves.toMatchObject({
+                    dueDate: '2026-08-20',
+                    accountingMonth: '2026-08-01',
+                });
+            });
         });
 
         describe('rules', () => {
