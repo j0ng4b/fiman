@@ -3,12 +3,12 @@ import { eq } from 'drizzle-orm';
 import { inject } from 'vitest';
 
 import type { Account } from '../../src/accounts/accounts.schema.ts';
-import type { Category } from '../../src/categories/categories.schema.ts';
 import type { EntryType } from '../../src/common/dto.ts';
 import type { Database } from '../../src/database/database.types.ts';
 import type {
     TransactionDateField,
     TransactionStatus,
+    UpdateTransactionDto,
 } from '../../src/transactions/transactions.dto.ts';
 import type { Transaction } from '../../src/transactions/transactions.schema.ts';
 import type { User } from '../../src/users/users.schema.ts';
@@ -20,12 +20,18 @@ import {
     CategoryInactiveError,
     CategoryNotFoundError,
 } from '../../src/categories/categories.exceptions.ts';
+import {
+    categoriesTable,
+    type Category,
+} from '../../src/categories/categories.schema.ts';
 import { today, tomorrow } from '../../src/common/dates.ts';
 import {
     TransactionAccountingMonthAfterDueDateError,
     TransactionBeforeAccountStartError,
     TransactionCategoryTypeMismatchError,
     TransactionDateInFutureError,
+    TransactionFieldsImmutableError,
+    TransactionNotEditableError,
     TransactionNotFoundError,
 } from '../../src/transactions/transactions.exceptions.ts';
 import { transactionsTable } from '../../src/transactions/transactions.schema.ts';
@@ -1124,7 +1130,280 @@ describe('TransactionsService', () => {
         });
     });
 
-    describe.todo('update', () => {});
+    describe('update', () => {
+        let user: User;
+        let incomeCategory: Category;
+        let expenseCategory: Category;
+        let account: Account;
+        let transactions: {
+            planned: Transaction;
+            realized: Transaction;
+            canceled: Transaction;
+        };
+
+        beforeEach(async () => {
+            user = await createUser(db);
+            incomeCategory = await createCategory(db, user.id, 'I');
+            expenseCategory = await createCategory(db, user.id, 'E');
+            account = await createAccount(db, user.id);
+
+            transactions = {
+                planned: await createPlannedTransaction(
+                    db,
+                    user.id,
+                    account.id,
+                    incomeCategory.id,
+                    'I',
+                ),
+
+                realized: await createRealizedTransaction(
+                    db,
+                    user.id,
+                    account.id,
+                    expenseCategory.id,
+                    'E',
+                ),
+
+                canceled: await createCanceledTransaction(
+                    db,
+                    user.id,
+                    account.id,
+                    incomeCategory.id,
+                    'I',
+                ),
+            };
+        });
+
+        it('updates the planned transaction allowed fields', async () => {
+            const newCategory = await createCategory(db, user.id, 'I');
+            const updated = await service.update(
+                user.id,
+                transactions.planned.id,
+                {
+                    amount: 10_000_00,
+                    dueDate: '2026-12-31',
+                    description: 'New description',
+                    accountingMonth: '2026-11-01',
+                    categoryId: newCategory.id,
+                },
+            );
+
+            expect(updated).toMatchObject({
+                amount: 10_000_00,
+                dueDate: '2026-12-31',
+                description: 'New description',
+                accountingMonth: '2026-11-01',
+                categoryId: newCategory.id,
+            });
+
+            await expect(
+                findTransaction(db, transactions.planned.id),
+            ).resolves.toMatchObject(updated);
+        });
+
+        it('updates the realized transaction allowed fields', async () => {
+            const newCategory = await createCategory(db, user.id, 'E');
+            const updated = await service.update(
+                user.id,
+                transactions.realized.id,
+                {
+                    description: 'New description',
+                    categoryId: newCategory.id,
+                },
+            );
+
+            expect(updated).toMatchObject({
+                description: 'New description',
+                categoryId: newCategory.id,
+            });
+
+            await expect(
+                findTransaction(db, transactions.realized.id),
+            ).resolves.toMatchObject(updated);
+        });
+
+        describe('accounting month', () => {
+            it('updates accountingMonth when dueDate changes and both originally belong to the same month', async () => {});
+
+            it('preserves accountingMonth when dueDate changes and the months already differ', async () => {});
+        });
+
+        describe('rules', () => {
+            it('rejects updates to canceled transactions', async () => {
+                await expect(
+                    service.update(user.id, transactions.canceled.id, {
+                        description: 'New description',
+                    }),
+                ).rejects.toThrow(TransactionNotEditableError);
+
+                await expect(
+                    findTransaction(db, transactions.canceled.id),
+                ).resolves.toEqual(transactions.canceled);
+            });
+
+            it('rejects updates when the transaction does not exist', async () => {
+                await expect(service.update(user.id, -1, {})).rejects.toThrow(
+                    TransactionNotFoundError,
+                );
+            });
+
+            it('rejects updates when the transaction belongs to another user', async () => {
+                const otherUser = await createUser(db);
+
+                await expect(
+                    service.update(otherUser.id, transactions.realized.id, {
+                        description: 'Should not persist anything',
+                    }),
+                ).rejects.toThrow(TransactionNotFoundError);
+
+                await expect(
+                    findTransaction(db, transactions.realized.id),
+                ).resolves.toEqual(transactions.realized);
+            });
+
+            it.for([
+                ['amount', 0],
+                ['dueDate', '2026-12-10'],
+                ['accountingMonth', '2026-01-01'],
+            ])(
+                'rejects changes to %s on realized transactions',
+                async (data) => {
+                    const dataToUpdate = Object.fromEntries([data]);
+                    await expect(
+                        service.update(
+                            user.id,
+                            transactions.realized.id,
+                            dataToUpdate,
+                        ),
+                    ).rejects.toThrow(TransactionFieldsImmutableError);
+
+                    await expect(
+                        findTransaction(db, transactions.realized.id),
+                    ).resolves.toEqual(transactions.realized);
+                },
+            );
+
+            it('rejects an accounting month later than the due date month', async () => {
+                await expect(
+                    service.update(user.id, transactions.planned.id, {
+                        accountingMonth: '2030-01-01',
+                    }),
+                ).rejects.toThrow(TransactionAccountingMonthAfterDueDateError);
+
+                await expect(
+                    findTransaction(db, transactions.planned.id),
+                ).resolves.toEqual(transactions.planned);
+            });
+
+            it('rejects moving the due date before a preserved accounting month', async () => {
+                await service.update(user.id, transactions.planned.id, {
+                    dueDate: '2026-12-15',
+                    accountingMonth: '2026-11-01',
+                });
+
+                await expect(
+                    service.update(user.id, transactions.planned.id, {
+                        dueDate: '2026-10-20',
+                    }),
+                ).rejects.toThrow(TransactionAccountingMonthAfterDueDateError);
+            });
+
+            describe('account start date boundaries', () => {
+                let recentAccount: Account;
+                let recentAccountTransaction: Transaction;
+
+                beforeEach(async () => {
+                    recentAccount = await createAccount(
+                        db,
+                        user.id,
+                        'Recent Account',
+                        0,
+                        '2026-12-10',
+                    );
+
+                    recentAccountTransaction = await createPlannedTransaction(
+                        db,
+                        user.id,
+                        recentAccount.id,
+                        expenseCategory.id,
+                        'E',
+                        100_00,
+                        '2026-12-31',
+                    );
+                });
+
+                it.for([
+                    [
+                        'due date before account start date',
+                        { dueDate: '2026-12-09' },
+                    ],
+                    [
+                        'accounting month before account start month',
+                        { accountingMonth: '2026-11-01' },
+                    ],
+                ])('rejects updates with %s', async ([_, data]) => {
+                    await expect(
+                        service.update(
+                            user.id,
+                            recentAccountTransaction.id,
+                            data as UpdateTransactionDto,
+                        ),
+                    ).rejects.toThrow(TransactionBeforeAccountStartError);
+
+                    await expect(
+                        findTransaction(db, recentAccountTransaction.id),
+                    ).resolves.toEqual(recentAccountTransaction);
+                });
+
+                it.for([
+                    [
+                        'due date equal to account start date',
+                        { dueDate: '2026-12-10' },
+                    ],
+                    [
+                        'accounting month equal to account start month',
+                        { accountingMonth: '2026-12-01' },
+                    ],
+                ])('accepts updates with %s', async ([_, data]) => {
+                    await expect(
+                        service.update(
+                            user.id,
+                            recentAccountTransaction.id,
+                            data as UpdateTransactionDto,
+                        ),
+                    ).resolves.toMatchObject(data as UpdateTransactionDto);
+
+                    await expect(
+                        findTransaction(db, recentAccountTransaction.id),
+                    ).resolves.toMatchObject(data as UpdateTransactionDto);
+                });
+            });
+
+            describe('category', () => {
+                it('rejects categories that does not exist', async () => {});
+
+                it('rejects categories that belongs to another user', async () => {});
+
+                it('rejects inactive categories', async () => {});
+
+                it('rejects a category type that does not match the transaction type', async () => {});
+
+                it('accepts keeping the current category even if it became inactive', async () => {
+                    await db
+                        .update(categoriesTable)
+                        .set({ active: false })
+                        .where(eq(categoriesTable.id, incomeCategory.id));
+
+                    await expect(
+                        service.update(user.id, transactions.planned.id, {
+                            categoryId: incomeCategory.id,
+                            description: 'Same category',
+                        }),
+                    ).resolves.toMatchObject({ categoryId: incomeCategory.id });
+                });
+            });
+        });
+    });
 
     describe.todo('realize', () => {});
 
